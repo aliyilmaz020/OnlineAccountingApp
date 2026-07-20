@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/Core/">
+    <Project Path="OnlineAccountingApp.Application/OnlineAccountingApp.Application.csproj" Id="7830dd66-d45c-4909-9c47-0c9b5da6aeb1" />
+    <Project Path="OnlineAccountingApp.Domain/OnlineAccountingApp.Domain.csproj" Id="36e4a1fa-8deb-4248-a0c6-2996d1f2ab48" />
+  </Folder>
+  <Folder Name="/Infrastructure/">
+    <Project Path="OnlineAccountingApp.Infrastructure/OnlineAccountingApp.Infrastructure.csproj" Id="6b82627b-4b29-4fe9-8733-5faa3486c0fd" />
+    <Project Path="OnlineAccountingApp.Persistence/OnlineAccountingApp.Persistence.csproj" Id="ef5b5776-d26f-4ec4-8911-bae19dda0c92" />
+  </Folder>
+  <Folder Name="/Presentation/">
+    <Project Path="OnlineAccountingApp.WebApi/OnlineAccountingApp.WebApi.csproj" Id="f79beac4-69c7-4d47-b123-13a74d5bc821" />
+  </Folder>
+</Solution>

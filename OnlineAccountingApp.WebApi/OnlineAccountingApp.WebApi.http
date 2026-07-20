@@ -1,0 +1,6 @@
+@OnlineAccountingApp.WebApi_HostAddress = http://localhost:5251
+
+GET {{OnlineAccountingApp.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
