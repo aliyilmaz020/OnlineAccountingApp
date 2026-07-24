@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace OnlineAccountingApp.Persistence.Migrations
+namespace OnlineAccountingApp.Persistence.Migrations.AppDb
 {
     /// <inheritdoc />
     public partial class mig_1 : Migration
