@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using OnlineAccountingApp.Domain.Entities;
+using OnlineAccountingApp.Persistence.Configurations;
 
 namespace OnlineAccountingApp.Persistence.Context;
 
@@ -12,18 +13,25 @@ public sealed class CompanyDbContext : DbContext
     {
         if (company is not null)
         {
-            if (string.IsNullOrEmpty(company.ServerUserId))
-                ConnectionString =
-                    $"Server={company.ServerName};Database={company.DatabaseName};TrustServerCertificate=True;";
-            else
-                ConnectionString =
-                    $"Server={company.ServerName};Database={company.DatabaseName};User Id={company.ServerUserId};Password={company.ServerPassword};TrustServerCertificate=True;";
+            if (company != null)
+            {
+                ConnectionString = $"" +
+                    $"Data Source={company.ServerName};" +
+                    $"Initial Catalog={company.DatabaseName};" +
+                    $"User Id={company.ServerUserId};" +
+                    $"Password={company.ServerPassword};" +
+                    $"Connect Timeout=30;" +
+                    $"Encrypt=False;" +
+                    $"TrustServerCertificate=False;" +
+                    $"ApplicationIntent=ReadWrite;" +
+                    $"MultiSubnetFailover=False";
+            }
         }
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AssemblyReference).Assembly);
+        modelBuilder.ApplyConfiguration(new UCAFConfiguration());
     }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

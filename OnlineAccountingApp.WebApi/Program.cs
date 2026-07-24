@@ -1,4 +1,5 @@
 using OnlineAccountingApp.WebApi.Configurations;
+using OnlineAccountingApp.WebApi.DependencyInjections.Application;
 using OnlineAccountingApp.WebApi.DependencyInjections.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,8 +8,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.ConfigureSwagger();
+builder.Services.ConfigureApi();
 builder.Services.AddPersistence(builder.Configuration); 
+builder.Services.AddApplication();
 
 var app = builder.Build();
 

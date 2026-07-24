@@ -5,30 +5,33 @@ namespace OnlineAccountingApp.WebApi.Configurations;
 
 public static partial class ApiConfig
 {
-    public static IServiceCollection ConfigureSwagger(this IServiceCollection services)
+    extension(IServiceCollection services)
     {
-        services.AddSwaggerGen(setup =>
+        public void AddConfigureSwagger()
         {
-            var jwtSecurityScheme = new OpenApiSecurityScheme
+            services.AddSwaggerGen(setup =>
             {
-                BearerFormat = "JWT",
-                Name = "Authorization",
-                In = ParameterLocation.Header,
-                Type = SecuritySchemeType.Http,
-                Scheme = JwtBearerDefaults.AuthenticationScheme,
-                Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\""
-            };
-
-            setup.AddSecurityDefinition(jwtSecurityScheme.Scheme, jwtSecurityScheme);
-
-            setup.AddSecurityRequirement(document => new OpenApiSecurityRequirement
-            {
+                var jwtSecurityScheme = new OpenApiSecurityScheme
                 {
-                    new OpenApiSecuritySchemeReference(jwtSecurityScheme.Scheme, document),
-                    new List<string>()
-                }
+                    BearerFormat = "JWT",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Scheme = JwtBearerDefaults.AuthenticationScheme,
+                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\""
+                };
+
+                setup.AddSecurityDefinition(jwtSecurityScheme.Scheme, jwtSecurityScheme);
+
+                setup.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecuritySchemeReference(jwtSecurityScheme.Scheme, document),
+                        new List<string>()
+                    }
+                });
             });
-        });
-        return services;
+        }
     }
+
 }

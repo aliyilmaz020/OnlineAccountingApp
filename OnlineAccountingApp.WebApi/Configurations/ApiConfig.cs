@@ -2,4 +2,11 @@
 
 public static partial class ApiConfig
 {
+    extension(IServiceCollection services)
+    {
+        public void ConfigureApi()
+        {
+            services.AddConfigureSwagger();
+        }
+    }
 }
