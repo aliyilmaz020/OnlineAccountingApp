@@ -2,7 +2,9 @@ using FluentValidation;
 using OnlineAccountingApp.Application.Behaviors;
 using OnlineAccountingApp.Application.Mapper;
 using OnlineAccountingApp.Application.Services.AppServices;
-using OnlineAccountingApp.Persistence.Services;
+using OnlineAccountingApp.Application.Services.CompanyServices;
+using OnlineAccountingApp.Persistence.Services.AppServices;
+using OnlineAccountingApp.Persistence.Services.CompanyServices;
 
 namespace OnlineAccountingApp.WebApi.DependencyInjections.Application;
 
@@ -19,7 +21,9 @@ public static partial class ApplicationDependencyInjection
             });
             services.AddValidatorsFromAssembly(typeof(MapsterConfig).Assembly);
             MapsterConfig.RegisterCompanyMappings();
+            MapsterConfig.RegisterUniformChartOfAccountMappings();
             services.AddScoped<ICompanyService, CompanyService>();
+            services.AddScoped<IUniformChartOfAccountService, UniformChartOfAccountService>();
         }
     }
 }

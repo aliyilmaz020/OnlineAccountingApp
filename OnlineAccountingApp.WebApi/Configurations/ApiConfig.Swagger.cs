@@ -30,6 +30,8 @@ public static partial class ApiConfig
                         new List<string>()
                     }
                 });
+
+                setup.OperationFilter<CompanyHeaderOperationFilter>();
             });
         }
     }

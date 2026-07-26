@@ -20,4 +20,21 @@ public static class AppErrorCodes
         public const string AlreadyExists = ServiceCode + "409";
         public const string ValidationFailed = ServiceCode + "400";
     }
+
+    public static class UniformChartOfAccount
+    {
+        private const string ServiceCode = "02";
+
+        public const string NotFound = ServiceCode + "404";
+        public const string AlreadyExists = ServiceCode + "409";
+        public const string ValidationFailed = ServiceCode + "400";
+    }
+
+    public static class Tenant
+    {
+        private const string ServiceCode = "03";
+
+        public const string CompanyNotSpecified = ServiceCode + "400";
+        public const string CompanyNotFound = ServiceCode + "404";
+    }
 }

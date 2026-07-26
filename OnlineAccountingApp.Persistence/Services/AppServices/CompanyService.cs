@@ -3,9 +3,9 @@ using OnlineAccountingApp.Application.Services.AppServices;
 using OnlineAccountingApp.Domain.Entities;
 using OnlineAccountingApp.Persistence.Context;
 
-namespace OnlineAccountingApp.Persistence.Services;
+namespace OnlineAccountingApp.Persistence.Services.AppServices;
 
-public sealed class CompanyService(AppDbContext context) : Repository<Company>(context), ICompanyService
+public sealed class CompanyService(AppDbContext context) : Repository<Company, AppDbContext>(context), ICompanyService
 {
     private static readonly Func<AppDbContext, string, Task<Company?>> GetCompanyByNameAsyncCompiled = EF.CompileAsyncQuery((AppDbContext dbContext, string name) =>
         dbContext.Companies.FirstOrDefault(c => c.Name == name));

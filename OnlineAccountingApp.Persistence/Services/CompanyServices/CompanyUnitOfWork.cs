@@ -1,11 +1,12 @@
 using Microsoft.EntityFrameworkCore.Storage;
 using OnlineAccountingApp.Application.Services;
+using OnlineAccountingApp.Application.Services.CompanyServices;
 using OnlineAccountingApp.Domain.Abstracts;
 using OnlineAccountingApp.Persistence.Context;
 
-namespace OnlineAccountingApp.Persistence.Services;
+namespace OnlineAccountingApp.Persistence.Services.CompanyServices;
 
-public sealed class UnitOfWork(AppDbContext context) : IUnitOfWork
+public sealed class CompanyUnitOfWork(CompanyDbContext context) : ICompanyUnitOfWork
 {
     private readonly Dictionary<Type, object> _repositories = [];
     private IDbContextTransaction? _transaction;
@@ -16,7 +17,7 @@ public sealed class UnitOfWork(AppDbContext context) : IUnitOfWork
         Type entityType = typeof(T);
         if (!_repositories.TryGetValue(entityType, out object? repository))
         {
-            repository = new Repository<T, AppDbContext>(context);
+            repository = new Repository<T, CompanyDbContext>(context);
             _repositories[entityType] = repository;
         }
 

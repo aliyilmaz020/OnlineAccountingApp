@@ -1,8 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OnlineAccountingApp.Application.Services;
+using OnlineAccountingApp.Application.Services.CompanyServices;
+using OnlineAccountingApp.Domain.Entities;
 using OnlineAccountingApp.Domain.Entities.Identity;
+using OnlineAccountingApp.Domain.Exceptions;
 using OnlineAccountingApp.Persistence.Context;
 using OnlineAccountingApp.Persistence.Services;
+using OnlineAccountingApp.Persistence.Services.CompanyServices;
+using OnlineAccountingApp.WebApi.Tenancy;
 
 namespace OnlineAccountingApp.WebApi.DependencyInjections.Persistence;
 
@@ -26,8 +31,48 @@ public static partial class PersistenceDependencyInjection
             }).AddEntityFrameworkStores<AppDbContext>();
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
-        }
 
+            AddCompanyTenancy(services);
+        }
+    }
+
+    /// <summary>
+    /// Registers the per-request resolution of the current company's own database.
+    /// Unlike <see cref="AppDbContext"/>, <see cref="CompanyDbContext"/> has no fixed
+    /// connection string: it is built from the <see cref="Company"/> identified by the
+    /// current request, and is only resolved when a company-scoped service asks for it.
+    /// </summary>
+    private static void AddCompanyTenancy(IServiceCollection serviceCollection)
+    {
+        serviceCollection.AddHttpContextAccessor();
+        serviceCollection.AddScoped<ICompanyContext, HttpCompanyContext>();
+
+        serviceCollection.AddScoped(serviceProvider =>
+        {
+            ICompanyContext companyContext = serviceProvider.GetRequiredService<ICompanyContext>();
+            if (string.IsNullOrWhiteSpace(companyContext.CompanyId))
+            {
+                throw new BusinessException(
+                    AppErrorCodes.Tenant.CompanyNotSpecified,
+                    $"The '{ICompanyContext.HeaderName}' header is required for this operation.");
+            }
+
+            AppDbContext appDbContext = serviceProvider.GetRequiredService<AppDbContext>();
+            Company? company = appDbContext.Companies
+                .AsNoTracking()
+                .FirstOrDefault(c => c.Id == companyContext.CompanyId && !c.Deleted);
+
+            if (company is null)
+            {
+                throw new BusinessException(
+                    AppErrorCodes.Tenant.CompanyNotFound,
+                    $"Company '{companyContext.CompanyId}' was not found.");
+            }
+
+            return new CompanyDbContext(company);
+        });
+
+        serviceCollection.AddScoped<ICompanyUnitOfWork, CompanyUnitOfWork>();
     }
 }
 

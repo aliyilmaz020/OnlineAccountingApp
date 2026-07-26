@@ -6,7 +6,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+// Update endpoints take the id from the route and assign it after model binding, so the
+// implicit "required" that MVC infers for non-nullable properties would reject valid bodies.
+builder.Services.AddControllers(options =>
+{
+    options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
+});
 
 builder.Services.ConfigureApi();
 builder.Services.AddPersistence(builder.Configuration); 
