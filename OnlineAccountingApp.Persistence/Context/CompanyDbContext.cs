@@ -13,19 +13,16 @@ public sealed class CompanyDbContext : DbContext
     {
         if (company is not null)
         {
-            if (company != null)
-            {
-                ConnectionString = $"" +
-                    $"Data Source={company.ServerName};" +
-                    $"Initial Catalog={company.DatabaseName};" +
-                    $"User Id={company.ServerUserId};" +
-                    $"Password={company.ServerPassword};" +
-                    $"Connect Timeout=30;" +
-                    $"Encrypt=False;" +
-                    $"TrustServerCertificate=False;" +
-                    $"ApplicationIntent=ReadWrite;" +
-                    $"MultiSubnetFailover=False";
-            }
+            ConnectionString = $"" +
+                $"Data Source={company.ServerName};" +
+                $"Initial Catalog={company.DatabaseName};" +
+                $"User Id={company.ServerUserId};" +
+                $"Password={company.ServerPassword};" +
+                $"Connect Timeout=30;" +
+                $"Encrypt=False;" +
+                $"TrustServerCertificate=False;" +
+                $"ApplicationIntent=ReadWrite;" +
+                $"MultiSubnetFailover=False";
         }
     }
 
@@ -41,7 +38,13 @@ public sealed class CompanyDbContext : DbContext
     {
         public CompanyDbContext CreateDbContext(string[] args)
         {
-            return new CompanyDbContext(null);
+            var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
+            optionsBuilder.UseSqlServer("Server=localhost;Database=AccountingMasterDb;User Id=sa;Password=Password1;TrustServerCertificate=True;");
+
+            using var appDbContext = new AppDbContext(optionsBuilder.Options);
+            var company = appDbContext.Companies.FirstOrDefault();
+
+            return new CompanyDbContext(company);
         }
     }
 }

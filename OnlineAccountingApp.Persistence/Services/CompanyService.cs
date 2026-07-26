@@ -21,14 +21,7 @@ public sealed class CompanyService(AppDbContext context) : Repository<Company>(c
         foreach (var company in companies)
         {
             var db = new CompanyDbContext(company);
-            try
-            {
-                await db.Database.MigrateAsync();
-            }
-            catch (Exception ex)
-            {
-                return false;
-            }
+            await db.Database.MigrateAsync();
         }
         return true;
     }
