@@ -7,6 +7,7 @@ public static partial class ApiConfig
         public void ConfigureApi()
         {
             services.AddConfigureSwagger();
+            services.AddConfigureErrorHandling();
         }
     }
 }

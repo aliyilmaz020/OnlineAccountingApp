@@ -1,10 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
 
 namespace OnlineAccountingApp.WebApi.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class TestController : ControllerBase
+    public class TestController(IMediator mediator) : BaseApiController(mediator)
     {
         [HttpGet]
         public IActionResult Get()

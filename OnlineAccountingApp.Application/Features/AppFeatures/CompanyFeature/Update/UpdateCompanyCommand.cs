@@ -1,10 +1,11 @@
-﻿using MediatR;
+using MediatR;
 using OnlineAccountingApp.Application.Features.AppFeatures.CompanyFeature.GetCompanies;
 
-namespace OnlineAccountingApp.Application.Features.AppFeatures.CompanyFeature.Create;
+namespace OnlineAccountingApp.Application.Features.AppFeatures.CompanyFeature.Update;
 
-public sealed class CreateCompanyCommand : IRequest<CompanyListItemDto>
+public sealed class UpdateCompanyCommand : IRequest<CompanyListItemDto>
 {
+    public string Id { get; set; }
     public string Name { get; set; }
     public string Address { get; set; }
     public string IdentityNumber { get; set; }

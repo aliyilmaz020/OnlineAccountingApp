@@ -1,3 +1,5 @@
+using FluentValidation;
+using OnlineAccountingApp.Application.Behaviors;
 using OnlineAccountingApp.Application.Mapper;
 using OnlineAccountingApp.Application.Services.AppServices;
 using OnlineAccountingApp.Persistence.Services;
@@ -10,7 +12,12 @@ public static partial class ApplicationDependencyInjection
     {
         public void AddApplication()
         {
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(MapsterConfig).Assembly));
+            services.AddMediatR(cfg =>
+            {
+                cfg.RegisterServicesFromAssembly(typeof(MapsterConfig).Assembly);
+                cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+            });
+            services.AddValidatorsFromAssembly(typeof(MapsterConfig).Assembly);
             MapsterConfig.RegisterCompanyMappings();
             services.AddScoped<ICompanyService, CompanyService>();
         }

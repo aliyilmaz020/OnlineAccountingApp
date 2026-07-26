@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using OnlineAccountingApp.Application.Services;
 using OnlineAccountingApp.Domain.Entities.Identity;
 using OnlineAccountingApp.Persistence.Context;
+using OnlineAccountingApp.Persistence.Services;
 
 namespace OnlineAccountingApp.WebApi.DependencyInjections.Persistence;
 
@@ -22,6 +24,8 @@ public static partial class PersistenceDependencyInjection
                 options.Password.RequireNonAlphanumeric = true;
                 options.Password.RequiredLength = 6;
             }).AddEntityFrameworkStores<AppDbContext>();
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
         }
 
     }
