@@ -362,3 +362,6 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 graphify-out/
+
+# Claude Code local runtime state
+.claude/
