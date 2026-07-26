@@ -36,7 +36,11 @@ Sistemde iki tür veritabanı vardır:
   (örn. tekdüzen hesap planı) burada tutulur ve şirketler birbirinin verisini asla göremez.
 
 Bir istek hangi şirkete ait olduğunu `X-Company-Id` başlığı ile bildirir; API o şirketin
-veritabanına bağlanır.
+veritabanına bağlanır. Başlıktaki şirket, token'daki kullanıcının `UserCompany` üzerinden
+gerçekten erişim hakkı olduğu bir şirket olmak zorundadır.
+
+> **Kimlik doğrulama zorunludur.** `/api/Auth/*` dışındaki tüm uç noktalar
+> `Authorization: Bearer <token>` başlığı ister.
 
 ## Teknolojiler
 
@@ -96,6 +100,22 @@ master veritabanını gösterir:
 > bu bilgiyi dosyada tutmayın; `dotnet user-secrets set "ConnectionStrings:SqlServer" "..."`
 > kullanın. Aynı şey şirket kayıtlarında saklanan `ServerPassword` alanı için de geçerlidir —
 > şu an düz metin olarak saklanmaktadır.
+
+**JWT ayarları.** Aynı dosyadaki `Jwt` bölümü token üretimini yapılandırır:
+
+```json
+"Jwt": {
+  "Issuer": "OnlineAccountingApp",
+  "Audience": "OnlineAccountingApp.Client",
+  "SecretKey": "dev-only-secret-change-me-with-user-secrets-at-least-32-bytes",
+  "AccessTokenMinutes": 15,
+  "RefreshTokenDays": 7
+}
+```
+
+> `SecretKey` de bağlantı dizesi gibi depoya girmemelidir:
+> `dotnet user-secrets set "Jwt:SecretKey" "..."`. HMAC-SHA256 için en az 32 baytlık bir anahtar
+> kullanın.
 
 ## Veritabanı ve Migration'lar
 
@@ -173,7 +193,9 @@ OnlineAccountingApp/
 │   ├── Configurations/ + Constants/     # Şirket DB tablo yapılandırmaları
 │   └── Migrations/AppDb + Migrations/CompanyDb
 │
-├── OnlineAccountingApp.Infrastructure/  # Şimdilik boş (e-posta, dosya, dış servisler için)
+├── OnlineAccountingApp.Infrastructure/  # Dış dünya gerçeklemeleri
+│   ├── Options/JwtOptions.cs            # "Jwt" yapılandırma bölümü
+│   └── Services/JwtTokenService.cs      # ITokenService — token üretimi
 │
 └── OnlineAccountingApp.WebApi/          # Sunum katmanı
     ├── Controllers/                     # İnce MediatR dispatcher'ları
@@ -206,21 +228,36 @@ kurulur: hangi şirkete bağlanılacağı `X-Company-Id` başlığından okunur.
 
 ```
 İstek
+  │  Authorization: Bearer <token>
   │  X-Company-Id: 16e1818a-...
   ▼
-HttpCompanyContext ──► ICompanyContext.CompanyId
+HttpCompanyContext ──► CompanyId (başlıktan)  +  UserId (token claim'inden)
   │
   ▼
 AddCompanyTenancy() (PersistenceDependencyInjection)
   │  Master DB'den Company kaydını bulur
-  │  Başlık yoksa      → 03400
-  │  Şirket bulunamazsa → 03404
+  │  Başlık yoksa       → 03400
+  │  Şirket bulunamazsa  → 03404
+  │  UserCompany kaydı yoksa → 04403   ← erişim kontrolü
   ▼
 CompanyDbContext (o şirketin bağlantı dizesiyle)
   │
   ▼
 UniformChartOfAccountService  +  ICompanyUnitOfWork
 ```
+
+Başlığın tek başına bir yetki kanıtı olmadığına dikkat edin: kullanıcının o şirkete
+`UserCompany` üzerinden bağlı olması gerekir, aksi halde kimliği doğrulanmış herhangi bir kullanıcı
+başka bir kiracının verisini okuyabilirdi.
+
+> ⚠ **Kullanıcıyı şirkete bağlama.** Henüz `UserCompany` kaydı oluşturan bir uç nokta yok. Yeni
+> kayıt olan bir kullanıcı hiçbir şirkete bağlı olmadığı için tüm kiracı uçlarından `04403` alır.
+> Bu uç nokta yazılana kadar kaydı elle eklemeniz gerekir:
+>
+> ```sql
+> INSERT INTO UserCompanies (Id, AppUserId, CompanyId, CreateDate, Status, Deleted)
+> VALUES (NEWID(), '<user-id>', '<company-id>', GETDATE(), 1, 0);
+> ```
 
 `CompanyDbContext` yalnızca ona ihtiyaç duyan bir servis çözümlendiğinde oluşturulur; master
 veritabanıyla çalışan uç noktalar bu maliyeti ödemez.
@@ -237,6 +274,7 @@ da zorunlu alan olarak görünür.
 
 ```bash
 curl -X POST http://localhost:5251/api/UniformChartOfAccounts/CreateUniformChartOfAccount \
+  -H "Authorization: Bearer <token>" \
   -H "X-Company-Id: 16e1818a-6e3e-47cf-8807-b3ddb65b0260" \
   -H "Content-Type: application/json" \
   -d '{"code":"100","name":"KASA","type":"Aktif"}'
@@ -244,9 +282,29 @@ curl -X POST http://localhost:5251/api/UniformChartOfAccounts/CreateUniformChart
 
 ## API Referansı
 
+### Auth — kimlik doğrulama
+
+Tek anonim grup; token gerekmez.
+
+| Metot | Yol | Açıklama |
+| --- | --- | --- |
+| `POST` | `/api/Auth/Register` | Kullanıcı oluşturur ve token çifti döner |
+| `POST` | `/api/Auth/Login` | E-posta/parola ile giriş, token çifti döner |
+| `POST` | `/api/Auth/RefreshToken` | Refresh token'ı yenisiyle değiştirir (rotasyon) |
+
+```bash
+curl -X POST http://localhost:5251/api/Auth/Login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com","password":"Passw0rd!"}'
+# -> { accessToken, refreshToken, accessTokenExpiresAt }
+```
+
+Access token varsayılan olarak 15 dakika, refresh token 7 gün geçerlidir. Refresh işleminde eski
+token iptal edilir; aynı refresh token'ı ikinci kez kullanmak `04401` döner.
+
 ### Companies — master veritabanı
 
-`X-Company-Id` başlığı **gerekmez**.
+Token gerekir; `X-Company-Id` başlığı **gerekmez**.
 
 | Metot | Yol | Açıklama |
 | --- | --- | --- |
@@ -259,7 +317,8 @@ curl -X POST http://localhost:5251/api/UniformChartOfAccounts/CreateUniformChart
 
 ### UniformChartOfAccounts — şirket veritabanı
 
-Tüm uç noktalar `X-Company-Id` başlığını **zorunlu** kılar.
+Tüm uç noktalar token'a ek olarak `X-Company-Id` başlığını **zorunlu** kılar ve kullanıcının o
+şirkete üyeliğini doğrular.
 
 | Metot | Yol | Açıklama |
 | --- | --- | --- |
@@ -334,6 +393,10 @@ Kod biçimi: **`{2 haneli servis kodu}{3 haneli HTTP durum kodu}`**. Son üç ha
 | `02409` | 409 | Aynı kodlu hesap planı kaydı zaten var |
 | `03400` | 400 | `X-Company-Id` başlığı gönderilmedi |
 | `03404` | 404 | Başlıktaki şirket bulunamadı |
+| `04400` | 400 | Kimlik doğrulama doğrulama hatası |
+| `04401` | 401 | Token yok/geçersiz, hatalı parola veya geçersiz refresh token |
+| `04403` | 403 | Kullanıcının bu şirkete erişim yetkisi yok |
+| `04409` | 409 | Bu e-posta ile kayıtlı kullanıcı zaten var |
 
 ## Yeni Feature Ekleme
 
@@ -360,6 +423,8 @@ adımlar:
 2. Servis arayüzünü/gerçeklemesini `ApplicationDependencyInjection` içinde kaydedin.
 3. Şirket veritabanıyla çalışıyorsa: `ICompanyUnitOfWork` enjekte edin (`IUnitOfWork` değil) ve
    controller'ı `[RequiresCompanyHeader]` ile işaretleyin.
+4. Controller'lar `BaseApiController`'dan türediği için otomatik olarak `[Authorize]` olur;
+   anonim erişim gerekiyorsa `[AllowAnonymous]` ekleyin (`AuthController` gibi).
 
 Ortak veri erişimi için hazır altyapıyı kullanın: `Repository<TEntity, TContext>` sınıfı
 oluşturma, güncelleme, soft delete, sayfalama (`GetPagedAsync`), varlık kontrolü ve sayım
@@ -367,11 +432,14 @@ metotlarını zaten sağlar.
 
 ## Yol Haritası
 
-- [ ] Kimlik doğrulama uç noktaları — JWT şeması Swagger'da tanımlı ancak token üreten bir
-      login uç noktası henüz yok
-- [ ] Şirket seçiminin `UserCompany` üzerinden JWT claim'ine taşınması (`X-Company-Id`
-      başlığının yerini alacak)
-- [ ] `Infrastructure` katmanının doldurulması (e-posta, dosya, dış servisler)
+- [x] JWT kimlik doğrulama — register / login / refresh token, tüm uçlar `[Authorize]`
+- [x] `X-Company-Id` başlığının `UserCompany` üzerinden doğrulanması (kiracılar arası erişim
+      kapatıldı)
+- [ ] **Kullanıcıyı şirkete atama uç noktaları** — şu an `UserCompany` kayıtları elle
+      ekleniyor (yukarıdaki nota bakın)
+- [ ] Rol yönetimi ve başlangıç seed'i (Admin/User)
+- [ ] `Me` ucu — kullanıcının erişebildiği şirketleri listeler
+- [ ] `Infrastructure` katmanının kalanının doldurulması (e-posta, dosya, dış servisler)
 - [ ] Şirket bağlantı parolalarının şifrelenmesi
 - [ ] Test projesi
 
@@ -415,7 +483,11 @@ There are two kinds of database in the system:
   accounts) lives here, and no company can ever see another's data.
 
 A request states which company it belongs to through the `X-Company-Id` header, and the API
-connects to that company's database.
+connects to that company's database. The company named in the header must be one the token's user
+actually has access to, via `UserCompany`.
+
+> **Authentication is mandatory.** Every endpoint except `/api/Auth/*` requires an
+> `Authorization: Bearer <token>` header.
 
 ## Tech Stack
 
@@ -475,6 +547,21 @@ dotnet run --project OnlineAccountingApp.WebApi
 > credentials in the file for a real environment — use
 > `dotnet user-secrets set "ConnectionStrings:SqlServer" "..."` instead. The same applies to the
 > `ServerPassword` field stored on company records, which is currently kept in plain text.
+
+**JWT settings.** The `Jwt` section in the same file configures token issuing:
+
+```json
+"Jwt": {
+  "Issuer": "OnlineAccountingApp",
+  "Audience": "OnlineAccountingApp.Client",
+  "SecretKey": "dev-only-secret-change-me-with-user-secrets-at-least-32-bytes",
+  "AccessTokenMinutes": 15,
+  "RefreshTokenDays": 7
+}
+```
+
+> `SecretKey` does not belong in the repository either:
+> `dotnet user-secrets set "Jwt:SecretKey" "..."`. Use a key of at least 32 bytes for HMAC-SHA256.
 
 ## Database and Migrations
 
@@ -552,7 +639,9 @@ OnlineAccountingApp/
 │   ├── Configurations/ + Constants/     # Company DB table configuration
 │   └── Migrations/AppDb + Migrations/CompanyDb
 │
-├── OnlineAccountingApp.Infrastructure/  # Empty for now (email, files, external services)
+├── OnlineAccountingApp.Infrastructure/  # Outside-world implementations
+│   ├── Options/JwtOptions.cs            # the "Jwt" configuration section
+│   └── Services/JwtTokenService.cs      # ITokenService — token issuing
 │
 └── OnlineAccountingApp.WebApi/          # Presentation layer
     ├── Controllers/                     # Thin MediatR dispatchers
@@ -585,21 +674,35 @@ is constructed **per request**: which company to connect to is read from the `X-
 
 ```
 Request
+  │  Authorization: Bearer <token>
   │  X-Company-Id: 16e1818a-...
   ▼
-HttpCompanyContext ──► ICompanyContext.CompanyId
+HttpCompanyContext ──► CompanyId (from header)  +  UserId (from token claim)
   │
   ▼
 AddCompanyTenancy() (PersistenceDependencyInjection)
   │  Looks the Company up in the master DB
-  │  Header missing    → 03400
-  │  Company not found → 03404
+  │  Header missing        → 03400
+  │  Company not found     → 03404
+  │  No UserCompany row    → 04403   ← access check
   ▼
 CompanyDbContext (built with that company's connection string)
   │
   ▼
 UniformChartOfAccountService  +  ICompanyUnitOfWork
 ```
+
+Note that the header alone is not proof of access: the user must be linked to that company through
+`UserCompany`, otherwise any authenticated user could read another tenant's data.
+
+> ⚠ **Linking a user to a company.** There is no endpoint yet that creates `UserCompany` rows. A
+> newly registered user belongs to no company and therefore gets `04403` from every tenant
+> endpoint. Until that endpoint exists, insert the row by hand:
+>
+> ```sql
+> INSERT INTO UserCompanies (Id, AppUserId, CompanyId, CreateDate, Status, Deleted)
+> VALUES (NEWID(), '<user-id>', '<company-id>', GETDATE(), 1, 0);
+> ```
 
 `CompanyDbContext` is only created when a service that needs it is resolved, so endpoints working
 against the master database never pay that cost.
@@ -616,6 +719,7 @@ as required in Swagger UI.
 
 ```bash
 curl -X POST http://localhost:5251/api/UniformChartOfAccounts/CreateUniformChartOfAccount \
+  -H "Authorization: Bearer <token>" \
   -H "X-Company-Id: 16e1818a-6e3e-47cf-8807-b3ddb65b0260" \
   -H "Content-Type: application/json" \
   -d '{"code":"100","name":"KASA","type":"Aktif"}'
@@ -623,9 +727,29 @@ curl -X POST http://localhost:5251/api/UniformChartOfAccounts/CreateUniformChart
 
 ## API Reference
 
+### Auth — authentication
+
+The only anonymous group; no token required.
+
+| Method | Path | Description |
+| --- | --- | --- |
+| `POST` | `/api/Auth/Register` | Creates a user and returns a token pair |
+| `POST` | `/api/Auth/Login` | Signs in with email/password, returns a token pair |
+| `POST` | `/api/Auth/RefreshToken` | Exchanges a refresh token for a new pair (rotation) |
+
+```bash
+curl -X POST http://localhost:5251/api/Auth/Login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com","password":"Passw0rd!"}'
+# -> { accessToken, refreshToken, accessTokenExpiresAt }
+```
+
+The access token is valid for 15 minutes by default, the refresh token for 7 days. Refreshing
+revokes the presented token; replaying the same refresh token returns `04401`.
+
 ### Companies — master database
 
-The `X-Company-Id` header is **not required**.
+Requires a token; the `X-Company-Id` header is **not required**.
 
 | Method | Path | Description |
 | --- | --- | --- |
@@ -638,7 +762,8 @@ The `X-Company-Id` header is **not required**.
 
 ### UniformChartOfAccounts — company database
 
-Every endpoint **requires** the `X-Company-Id` header.
+Every endpoint **requires** the `X-Company-Id` header in addition to the token, and verifies the
+user's membership of that company.
 
 | Method | Path | Description |
 | --- | --- | --- |
@@ -714,6 +839,10 @@ HTTP status.
 | `02409` | 409 | An entry with the same code already exists |
 | `03400` | 400 | `X-Company-Id` header was not supplied |
 | `03404` | 404 | The company in the header was not found |
+| `04400` | 400 | Authentication validation error |
+| `04401` | 401 | Missing/invalid token, wrong password, or invalid refresh token |
+| `04403` | 403 | The user has no access to this company |
+| `04409` | 409 | A user with this email already exists |
 
 ## Adding a Feature
 
@@ -740,16 +869,20 @@ steps:
 2. Register the service interface and implementation in `ApplicationDependencyInjection`.
 3. If it targets a company database: inject `ICompanyUnitOfWork` (not `IUnitOfWork`) and mark the
    controller `[RequiresCompanyHeader]`.
+4. Controllers inherit `[Authorize]` from `BaseApiController`; add `[AllowAnonymous]` if anonymous
+   access is needed (as `AuthController` does).
 
 Use the existing data-access plumbing: `Repository<TEntity, TContext>` already provides create,
 update, soft delete, paging (`GetPagedAsync`), existence checks, and counting.
 
 ## Roadmap
 
-- [ ] Authentication endpoints — the JWT scheme is declared in Swagger, but there is no login
-      endpoint issuing tokens yet
-- [ ] Move company selection into a JWT claim via `UserCompany` (replacing the `X-Company-Id`
-      header)
-- [ ] Fill in the `Infrastructure` layer (email, files, external services)
+- [x] JWT authentication — register / login / refresh token, every endpoint `[Authorize]`
+- [x] Validate the `X-Company-Id` header against `UserCompany` (cross-tenant access closed)
+- [ ] **Assign-user-to-company endpoints** — `UserCompany` rows are currently inserted by hand
+      (see the note above)
+- [ ] Role management and initial seeding (Admin/User)
+- [ ] A `Me` endpoint listing the companies a user can access
+- [ ] Fill in the rest of the `Infrastructure` layer (email, files, external services)
 - [ ] Encrypt company connection passwords
 - [ ] Test project

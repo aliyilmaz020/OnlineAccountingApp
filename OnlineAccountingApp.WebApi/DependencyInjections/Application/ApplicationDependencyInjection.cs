@@ -23,6 +23,7 @@ public static partial class ApplicationDependencyInjection
             MapsterConfig.RegisterCompanyMappings();
             MapsterConfig.RegisterUniformChartOfAccountMappings();
             services.AddScoped<ICompanyService, CompanyService>();
+            services.AddScoped<IRefreshTokenService, RefreshTokenService>();
             services.AddScoped<IUniformChartOfAccountService, UniformChartOfAccountService>();
         }
     }

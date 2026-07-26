@@ -1,5 +1,6 @@
 using OnlineAccountingApp.WebApi.Configurations;
 using OnlineAccountingApp.WebApi.DependencyInjections.Application;
+using OnlineAccountingApp.WebApi.DependencyInjections.Infrastructure;
 using OnlineAccountingApp.WebApi.DependencyInjections.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,7 +15,11 @@ builder.Services.AddControllers(options =>
 });
 
 builder.Services.ConfigureApi();
-builder.Services.AddPersistence(builder.Configuration); 
+builder.Services.AddPersistence(builder.Configuration);
+// Must follow AddPersistence(): AddIdentity makes cookies the default auth scheme, and the
+// later AddAuthentication registration is the one that wins.
+builder.Services.AddConfigureAuthentication(builder.Configuration);
+builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
 
 var app = builder.Build();
@@ -29,6 +34,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

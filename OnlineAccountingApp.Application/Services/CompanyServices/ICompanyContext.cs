@@ -11,4 +11,10 @@ public interface ICompanyContext
     const string HeaderName = "X-Company-Id";
 
     string? CompanyId { get; }
+
+    /// <summary>
+    /// Identifier of the authenticated user making the request, used to verify that the
+    /// user actually belongs to the requested company.
+    /// </summary>
+    string? UserId { get; }
 }

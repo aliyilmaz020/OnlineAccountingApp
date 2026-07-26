@@ -37,4 +37,15 @@ public static class AppErrorCodes
         public const string CompanyNotSpecified = ServiceCode + "400";
         public const string CompanyNotFound = ServiceCode + "404";
     }
+
+    public static class Auth
+    {
+        private const string ServiceCode = "04";
+
+        public const string ValidationFailed = ServiceCode + "400";
+        public const string InvalidCredentials = ServiceCode + "401";
+        public const string InvalidRefreshToken = ServiceCode + "401";
+        public const string CompanyAccessDenied = ServiceCode + "403";
+        public const string UserAlreadyExists = ServiceCode + "409";
+    }
 }

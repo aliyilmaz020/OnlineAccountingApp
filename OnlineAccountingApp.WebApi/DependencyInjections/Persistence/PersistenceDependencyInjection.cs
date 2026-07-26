@@ -69,6 +69,21 @@ public static partial class PersistenceDependencyInjection
                     $"Company '{companyContext.CompanyId}' was not found.");
             }
 
+            // The header alone is not proof of access: the caller must actually belong to
+            // this company, otherwise any authenticated user could read any tenant's data.
+            bool isMember = companyContext.UserId is not null && appDbContext.UserCompanies
+                .AsNoTracking()
+                .Any(uc => uc.AppUserId == companyContext.UserId
+                        && uc.CompanyId == company.Id
+                        && !uc.Deleted);
+
+            if (!isMember)
+            {
+                throw new BusinessException(
+                    AppErrorCodes.Auth.CompanyAccessDenied,
+                    "You do not have access to this company.");
+            }
+
             return new CompanyDbContext(company);
         });
 
