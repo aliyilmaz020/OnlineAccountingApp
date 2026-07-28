@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
@@ -32,7 +33,19 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : Ident
         return base.SaveChangesAsync(cancellationToken);
     }
 
-     public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+        builder.Entity<AppUser>().ToTable("Users");
+        builder.Entity<AppRole>().ToTable("Roles");
+        builder.Ignore<IdentityUserLogin<string>>();
+        builder.Ignore<IdentityUserClaim<string>>();
+        builder.Ignore<IdentityUserRole<string>>();
+        builder.Ignore<IdentityUserToken<string>>();
+        builder.Ignore<IdentityRoleClaim<string>>();
+    }
+
+    public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
     {
         public AppDbContext CreateDbContext(string[] args)
         {

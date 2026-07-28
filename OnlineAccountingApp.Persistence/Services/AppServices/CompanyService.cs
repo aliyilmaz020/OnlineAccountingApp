@@ -17,7 +17,7 @@ public sealed class CompanyService(AppDbContext context) : Repository<Company, A
 
     public async Task<bool> MigrateCompanyDbAsync()
     {
-        var companies = await context.Set<Company>().ToListAsync();
+        var companies = await context.Set<Company>().Where(c => c.Deleted == false).ToListAsync();
         foreach (var company in companies)
         {
             var db = new CompanyDbContext(company);
