@@ -38,9 +38,9 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : Ident
         base.OnModelCreating(builder);
         builder.Entity<AppUser>().ToTable("Users");
         builder.Entity<AppRole>().ToTable("Roles");
+        builder.Entity<IdentityUserRole<string>>().ToTable("UserRoles");
         builder.Ignore<IdentityUserLogin<string>>();
         builder.Ignore<IdentityUserClaim<string>>();
-        builder.Ignore<IdentityUserRole<string>>();
         builder.Ignore<IdentityUserToken<string>>();
         builder.Ignore<IdentityRoleClaim<string>>();
     }

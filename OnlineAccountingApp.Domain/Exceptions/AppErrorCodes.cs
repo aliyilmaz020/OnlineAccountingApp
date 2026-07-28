@@ -48,4 +48,13 @@ public static class AppErrorCodes
         public const string CompanyAccessDenied = ServiceCode + "403";
         public const string UserAlreadyExists = ServiceCode + "409";
     }
+
+    public static class Role
+    {
+        private const string ServiceCode = "05";
+
+        public const string NotFound = ServiceCode + "404";
+        public const string AlreadyExists = ServiceCode + "409";
+        public const string ValidationFailed = ServiceCode + "400";
+    }
 }

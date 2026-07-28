@@ -22,9 +22,11 @@ public static partial class ApplicationDependencyInjection
             services.AddValidatorsFromAssembly(typeof(MapsterConfig).Assembly);
             MapsterConfig.RegisterCompanyMappings();
             MapsterConfig.RegisterUniformChartOfAccountMappings();
+            MapsterConfig.RegisterRoleMappings();
             services.AddScoped<ICompanyService, CompanyService>();
             services.AddScoped<IRefreshTokenService, RefreshTokenService>();
             services.AddScoped<IUniformChartOfAccountService, UniformChartOfAccountService>();
+            services.AddScoped<IRoleService, RoleService>();
         }
     }
 }
