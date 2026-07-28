@@ -7,6 +7,6 @@ public sealed class AssignRoleToUserCommandValidator : AbstractValidator<AssignR
     public AssignRoleToUserCommandValidator()
     {
         RuleFor(command => command.UserId).NotEmpty();
-        RuleFor(command => command.RoleName).NotEmpty();
+        RuleFor(command => command.RoleCode).NotEmpty();
     }
 }

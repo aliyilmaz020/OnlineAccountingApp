@@ -27,4 +27,5 @@ public interface IRoleService
     Task<bool> AssignRoleToUserAsync(string userId, string roleName, CancellationToken cancellationToken = default);
     Task<bool> RemoveRoleFromUserAsync(string userId, string roleName, CancellationToken cancellationToken = default);
     Task<IList<string>> GetUserRolesAsync(string userId, CancellationToken cancellationToken = default);
+    Task<IList<AppRole>> GetRolesByUserIdAsync(string userId, CancellationToken cancellationToken = default);
 }

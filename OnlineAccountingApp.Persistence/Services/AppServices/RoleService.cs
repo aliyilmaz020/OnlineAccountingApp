@@ -126,6 +126,13 @@ public sealed class RoleService(RoleManager<AppRole> roleManager, UserManager<Ap
         return await userManager.GetRolesAsync(user);
     }
 
+    public async Task<IList<AppRole>> GetRolesByUserIdAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        AppUser user = await RequireUserAsync(userId);
+        IList<string> roleNames = await userManager.GetRolesAsync(user);
+        return await ActiveRoles().Where(role => roleNames.Contains(role.Name)).ToListAsync(cancellationToken);
+    }
+
     /// <summary>Soft-deleted roles are invisible to every read path.</summary>
     private IQueryable<AppRole> ActiveRoles()
     {

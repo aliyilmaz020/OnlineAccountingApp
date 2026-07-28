@@ -1,5 +1,5 @@
 using MediatR;
-using OnlineAccountingApp.Application.Features.AppFeatures.AuthFeature.Login;
+using OnlineAccountingApp.Application.Services.AppServices;
 
 namespace OnlineAccountingApp.Application.Features.AppFeatures.AuthFeature.RefreshToken;
 

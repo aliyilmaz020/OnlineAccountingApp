@@ -5,5 +5,5 @@ namespace OnlineAccountingApp.Application.Features.AppFeatures.RoleFeature.Assig
 public sealed class AssignRoleToUserCommand : IRequest<bool>
 {
     public string UserId { get; set; }
-    public string RoleName { get; set; }
+    public string RoleCode { get; set; }
 }

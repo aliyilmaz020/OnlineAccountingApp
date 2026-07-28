@@ -1,4 +1,4 @@
-namespace OnlineAccountingApp.Application.Features.AppFeatures.AuthFeature.Login;
+namespace OnlineAccountingApp.Application.Services.AppServices;
 
 public sealed class AuthResponseDto
 {

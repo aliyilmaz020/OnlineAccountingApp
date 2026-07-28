@@ -9,7 +9,7 @@ public sealed class AssignRoleToUserCommandHandler(IRoleService roleService) : I
 {
     public async Task<bool> Handle(AssignRoleToUserCommand request, CancellationToken cancellationToken)
     {
-        AppRole? role = await roleService.GetByNameAsync(request.RoleName, cancellationToken);
+        AppRole? role = await roleService.GetByCodeAsync(request.RoleCode, cancellationToken);
         if (role is null)
         {
             throw new BusinessException(AppErrorCodes.Role.NotFound, "Role not found.");

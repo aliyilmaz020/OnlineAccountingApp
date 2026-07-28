@@ -5,6 +5,7 @@ using OnlineAccountingApp.Application.Features.AppFeatures.RoleFeature.Create;
 using OnlineAccountingApp.Application.Features.AppFeatures.RoleFeature.Delete;
 using OnlineAccountingApp.Application.Features.AppFeatures.RoleFeature.GetRoleById;
 using OnlineAccountingApp.Application.Features.AppFeatures.RoleFeature.GetRoles;
+using OnlineAccountingApp.Application.Features.AppFeatures.RoleFeature.GetUserRoles;
 using OnlineAccountingApp.Application.Features.AppFeatures.RoleFeature.RemoveRoleFromUser;
 using OnlineAccountingApp.Application.Features.AppFeatures.RoleFeature.Update;
 
@@ -59,6 +60,13 @@ public class RolesController(IMediator mediator) : BaseApiController(mediator)
     public async Task<IActionResult> RemoveRoleFromUser([FromBody] RemoveRoleFromUserCommand command, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("[action]/{userId}")]
+    public async Task<IActionResult> GetUserRoles(string userId, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetUserRolesQuery { UserId = userId }, cancellationToken);
         return Ok(result);
     }
 }
