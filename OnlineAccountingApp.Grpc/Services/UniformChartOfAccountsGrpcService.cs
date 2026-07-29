@@ -25,7 +25,9 @@ public sealed class UniformChartOfAccountsGrpcService(IMediator mediator)
             Type = request.Type
         }, context.CancellationToken);
 
-        return ToItem(result);
+        UniformChartOfAccountItem item = ToItem(result);
+        item.Meta = new ApiResponseMeta { Success = true };
+        return item;
     }
 
     public override async Task<GetUniformChartOfAccountsResponse> GetUniformChartOfAccounts(
@@ -43,7 +45,8 @@ public sealed class UniformChartOfAccountsGrpcService(IMediator mediator)
             TotalCount = result.TotalCount,
             PageNumber = result.PageNumber,
             PageSize = result.PageSize,
-            TotalPages = result.TotalPages
+            TotalPages = result.TotalPages,
+            Meta = new ApiResponseMeta { Success = true }
         };
         response.Items.AddRange(result.Items.Select(ToItem));
         return response;
@@ -55,7 +58,9 @@ public sealed class UniformChartOfAccountsGrpcService(IMediator mediator)
         UniformChartOfAccountListItemDto result = await mediator.Send(
             new GetUniformChartOfAccountByIdQuery { Id = request.Id }, context.CancellationToken);
 
-        return ToItem(result);
+        UniformChartOfAccountItem item = ToItem(result);
+        item.Meta = new ApiResponseMeta { Success = true };
+        return item;
     }
 
     public override async Task<UniformChartOfAccountItem> UpdateUniformChartOfAccount(
@@ -69,7 +74,9 @@ public sealed class UniformChartOfAccountsGrpcService(IMediator mediator)
             Type = request.Type
         }, context.CancellationToken);
 
-        return ToItem(result);
+        UniformChartOfAccountItem item = ToItem(result);
+        item.Meta = new ApiResponseMeta { Success = true };
+        return item;
     }
 
     public override async Task<DeleteResponse> DeleteUniformChartOfAccount(
@@ -78,7 +85,7 @@ public sealed class UniformChartOfAccountsGrpcService(IMediator mediator)
         bool success = await mediator.Send(
             new DeleteUniformChartOfAccountCommand { Id = request.Id }, context.CancellationToken);
 
-        return new DeleteResponse { Success = success };
+        return new DeleteResponse { Success = success, Meta = new ApiResponseMeta { Success = true } };
     }
 
     private static UniformChartOfAccountItem ToItem(UniformChartOfAccountListItemDto dto) => new()

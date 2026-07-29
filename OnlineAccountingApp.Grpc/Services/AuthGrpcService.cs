@@ -40,6 +40,7 @@ public sealed class AuthGrpcService(IMediator mediator) : Auth.AuthBase
     {
         AccessToken = dto.AccessToken,
         RefreshToken = dto.RefreshToken,
-        AccessTokenExpiresAt = Timestamp.FromDateTime(DateTime.SpecifyKind(dto.AccessTokenExpiresAt, DateTimeKind.Utc))
+        AccessTokenExpiresAt = Timestamp.FromDateTime(DateTime.SpecifyKind(dto.AccessTokenExpiresAt, DateTimeKind.Utc)),
+        Meta = new ApiResponseMeta { Success = true }
     };
 }

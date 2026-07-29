@@ -2,6 +2,8 @@ syntax = "proto3";
 
 option csharp_namespace = "OnlineAccountingApp.Grpc.Protos";
 
+import "Protos/common.proto";
+
 package uniform_chart_of_accounts;
 
 service UniformChartOfAccounts {
@@ -17,6 +19,10 @@ message UniformChartOfAccountItem {
   string code = 2;
   string name = 3;
   string type = 4;
+  // Only populated when this message is the direct RPC response (Create,
+  // GetById, Update). Left unset (proto3 default) when embedded as a list
+  // item in GetUniformChartOfAccountsResponse.items.
+  common.ApiResponseMeta meta = 5;
 }
 
 message CreateUniformChartOfAccountRequest {
@@ -48,8 +54,10 @@ message GetUniformChartOfAccountsResponse {
   int32 page_number = 3;
   int32 page_size = 4;
   int32 total_pages = 5;
+  common.ApiResponseMeta meta = 6;
 }
 
 message DeleteResponse {
   bool success = 1;
+  common.ApiResponseMeta meta = 2;
 }

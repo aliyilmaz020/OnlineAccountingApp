@@ -3,6 +3,7 @@ syntax = "proto3";
 option csharp_namespace = "OnlineAccountingApp.Grpc.Protos";
 
 import "google/protobuf/timestamp.proto";
+import "Protos/common.proto";
 
 package auth;
 
@@ -30,4 +31,5 @@ message AuthResponse {
   string access_token = 1;
   string refresh_token = 2;
   google.protobuf.Timestamp access_token_expires_at = 3;
+  common.ApiResponseMeta meta = 4;
 }

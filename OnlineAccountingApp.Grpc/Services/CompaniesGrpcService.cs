@@ -32,7 +32,9 @@ public sealed class CompaniesGrpcService(IMediator mediator) : Companies.Compani
             ServerPassword = request.ServerPassword
         }, context.CancellationToken);
 
-        return ToItem(result);
+        CompanyItem item = ToItem(result);
+        item.Meta = new ApiResponseMeta { Success = true };
+        return item;
     }
 
     public override async Task<GetCompaniesResponse> GetCompanies(GetCompaniesRequest request, ServerCallContext context)
@@ -49,7 +51,8 @@ public sealed class CompaniesGrpcService(IMediator mediator) : Companies.Compani
             TotalCount = result.TotalCount,
             PageNumber = result.PageNumber,
             PageSize = result.PageSize,
-            TotalPages = result.TotalPages
+            TotalPages = result.TotalPages,
+            Meta = new ApiResponseMeta { Success = true }
         };
         response.Items.AddRange(result.Items.Select(ToItem));
         return response;
@@ -60,7 +63,9 @@ public sealed class CompaniesGrpcService(IMediator mediator) : Companies.Compani
         CompanyListItemDto result = await mediator.Send(
             new GetCompanyByIdQuery { Id = request.Id }, context.CancellationToken);
 
-        return ToItem(result);
+        CompanyItem item = ToItem(result);
+        item.Meta = new ApiResponseMeta { Success = true };
+        return item;
     }
 
     public override async Task<CompanyItem> UpdateCompany(UpdateCompanyRequest request, ServerCallContext context)
@@ -80,19 +85,21 @@ public sealed class CompaniesGrpcService(IMediator mediator) : Companies.Compani
             ServerPassword = request.ServerPassword
         }, context.CancellationToken);
 
-        return ToItem(result);
+        CompanyItem item = ToItem(result);
+        item.Meta = new ApiResponseMeta { Success = true };
+        return item;
     }
 
     public override async Task<DeleteCompanyResponse> DeleteCompany(GetCompanyByIdRequest request, ServerCallContext context)
     {
         bool success = await mediator.Send(new DeleteCompanyCommand { Id = request.Id }, context.CancellationToken);
-        return new DeleteCompanyResponse { Success = success };
+        return new DeleteCompanyResponse { Success = success, Meta = new ApiResponseMeta { Success = true } };
     }
 
     public override async Task<MigrateCompanyDbResponse> MigrateCompanyDb(Empty request, ServerCallContext context)
     {
         bool success = await mediator.Send(new MigrateCompanyDbCommand(), context.CancellationToken);
-        return new MigrateCompanyDbResponse { Success = success };
+        return new MigrateCompanyDbResponse { Success = success, Meta = new ApiResponseMeta { Success = true } };
     }
 
     private static CompanyItem ToItem(CompanyListItemDto dto) => new()

@@ -3,6 +3,7 @@ syntax = "proto3";
 option csharp_namespace = "OnlineAccountingApp.Grpc.Protos";
 
 import "google/protobuf/timestamp.proto";
+import "Protos/common.proto";
 
 package roles;
 
@@ -24,6 +25,10 @@ message RoleItem {
   bool status = 4;
   google.protobuf.Timestamp create_date = 5;
   optional google.protobuf.Timestamp edit_date = 6;
+  // Only populated when this message is the direct RPC response (CreateRole,
+  // GetRoleById, UpdateRole). Left unset (proto3 default) when embedded as a
+  // list item in GetRolesResponse.items / GetUserRolesResponse.items.
+  common.ApiResponseMeta meta = 7;
 }
 
 message CreateRoleRequest {
@@ -54,10 +59,12 @@ message GetRolesResponse {
   int32 page_number = 3;
   int32 page_size = 4;
   int32 total_pages = 5;
+  common.ApiResponseMeta meta = 6;
 }
 
 message DeleteRoleResponse {
   bool success = 1;
+  common.ApiResponseMeta meta = 2;
 }
 
 message AssignRoleToUserRequest {
@@ -67,6 +74,7 @@ message AssignRoleToUserRequest {
 
 message AssignRoleToUserResponse {
   bool success = 1;
+  common.ApiResponseMeta meta = 2;
 }
 
 message RemoveRoleFromUserRequest {
@@ -76,6 +84,7 @@ message RemoveRoleFromUserRequest {
 
 message RemoveRoleFromUserResponse {
   bool success = 1;
+  common.ApiResponseMeta meta = 2;
 }
 
 message GetUserRolesRequest {
@@ -84,4 +93,5 @@ message GetUserRolesRequest {
 
 message GetUserRolesResponse {
   repeated RoleItem items = 1;
+  common.ApiResponseMeta meta = 2;
 }

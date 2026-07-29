@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option csharp_namespace = "OnlineAccountingApp.Grpc.Protos";
+
+package common;
+
+// gRPC equivalent of OnlineAccountingApp.WebApi/Models/ApiResponse.cs.
+// Covers only the success path: the error path is already handled by
+// BusinessExceptionInterceptor, which converts exceptions into an RpcException
+// with the matching StatusCode plus error-code/errors-json trailers.
+message ApiResponseMeta {
+  bool success = 1;
+  string error_code = 2;
+  string message = 3;
+}

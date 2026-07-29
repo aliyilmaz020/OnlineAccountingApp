@@ -3,6 +3,7 @@ syntax = "proto3";
 option csharp_namespace = "OnlineAccountingApp.Grpc.Protos";
 
 import "google/protobuf/empty.proto";
+import "Protos/common.proto";
 
 package companies;
 
@@ -23,6 +24,10 @@ message CompanyItem {
   string tax_department = 5;
   string phone_number = 6;
   string email = 7;
+  // Only populated when this message is the direct RPC response (CreateCompany,
+  // GetCompanyById, UpdateCompany). Left unset (proto3 default) when embedded as
+  // a list item in GetCompaniesResponse.items - do not read meta.success there.
+  common.ApiResponseMeta meta = 8;
 }
 
 message CreateCompanyRequest {
@@ -68,12 +73,17 @@ message GetCompaniesResponse {
   int32 page_number = 3;
   int32 page_size = 4;
   int32 total_pages = 5;
+  common.ApiResponseMeta meta = 6;
 }
 
 message DeleteCompanyResponse {
+  // Business outcome of the delete operation - distinct from meta.success below,
+  // which reflects whether the RPC call itself succeeded.
   bool success = 1;
+  common.ApiResponseMeta meta = 2;
 }
 
 message MigrateCompanyDbResponse {
   bool success = 1;
+  common.ApiResponseMeta meta = 2;
 }

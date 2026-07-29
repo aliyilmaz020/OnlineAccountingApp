@@ -23,7 +23,9 @@ public sealed class RolesGrpcService(IMediator mediator) : Roles.RolesBase
         RoleListItemDto result = await mediator.Send(
             new CreateRoleCommand { Name = request.Name, Code = request.Code }, context.CancellationToken);
 
-        return ToItem(result);
+        RoleItem item = ToItem(result);
+        item.Meta = new ApiResponseMeta { Success = true };
+        return item;
     }
 
     public override async Task<GetRolesResponse> GetRoles(GetRolesRequest request, ServerCallContext context)
@@ -40,7 +42,8 @@ public sealed class RolesGrpcService(IMediator mediator) : Roles.RolesBase
             TotalCount = result.TotalCount,
             PageNumber = result.PageNumber,
             PageSize = result.PageSize,
-            TotalPages = result.TotalPages
+            TotalPages = result.TotalPages,
+            Meta = new ApiResponseMeta { Success = true }
         };
         response.Items.AddRange(result.Items.Select(ToItem));
         return response;
@@ -51,7 +54,9 @@ public sealed class RolesGrpcService(IMediator mediator) : Roles.RolesBase
         RoleListItemDto result = await mediator.Send(
             new GetRoleByIdQuery { Id = request.Id }, context.CancellationToken);
 
-        return ToItem(result);
+        RoleItem item = ToItem(result);
+        item.Meta = new ApiResponseMeta { Success = true };
+        return item;
     }
 
     public override async Task<RoleItem> UpdateRole(UpdateRoleRequest request, ServerCallContext context)
@@ -64,13 +69,15 @@ public sealed class RolesGrpcService(IMediator mediator) : Roles.RolesBase
             Status = request.Status
         }, context.CancellationToken);
 
-        return ToItem(result);
+        RoleItem item = ToItem(result);
+        item.Meta = new ApiResponseMeta { Success = true };
+        return item;
     }
 
     public override async Task<DeleteRoleResponse> DeleteRole(GetRoleByIdRequest request, ServerCallContext context)
     {
         bool success = await mediator.Send(new DeleteRoleCommand { Id = request.Id }, context.CancellationToken);
-        return new DeleteRoleResponse { Success = success };
+        return new DeleteRoleResponse { Success = success, Meta = new ApiResponseMeta { Success = true } };
     }
 
     public override async Task<AssignRoleToUserResponse> AssignRoleToUser(AssignRoleToUserRequest request, ServerCallContext context)
@@ -78,7 +85,7 @@ public sealed class RolesGrpcService(IMediator mediator) : Roles.RolesBase
         bool success = await mediator.Send(
             new AssignRoleToUserCommand { UserId = request.UserId, RoleCode = request.RoleCode }, context.CancellationToken);
 
-        return new AssignRoleToUserResponse { Success = success };
+        return new AssignRoleToUserResponse { Success = success, Meta = new ApiResponseMeta { Success = true } };
     }
 
     public override async Task<RemoveRoleFromUserResponse> RemoveRoleFromUser(RemoveRoleFromUserRequest request, ServerCallContext context)
@@ -86,7 +93,7 @@ public sealed class RolesGrpcService(IMediator mediator) : Roles.RolesBase
         bool success = await mediator.Send(
             new RemoveRoleFromUserCommand { UserId = request.UserId, RoleName = request.RoleName }, context.CancellationToken);
 
-        return new RemoveRoleFromUserResponse { Success = success };
+        return new RemoveRoleFromUserResponse { Success = success, Meta = new ApiResponseMeta { Success = true } };
     }
 
     public override async Task<GetUserRolesResponse> GetUserRoles(GetUserRolesRequest request, ServerCallContext context)
@@ -94,7 +101,7 @@ public sealed class RolesGrpcService(IMediator mediator) : Roles.RolesBase
         List<RoleListItemDto> result = await mediator.Send(
             new GetUserRolesQuery { UserId = request.UserId }, context.CancellationToken);
 
-        GetUserRolesResponse response = new();
+        GetUserRolesResponse response = new() { Meta = new ApiResponseMeta { Success = true } };
         response.Items.AddRange(result.Select(ToItem));
         return response;
     }

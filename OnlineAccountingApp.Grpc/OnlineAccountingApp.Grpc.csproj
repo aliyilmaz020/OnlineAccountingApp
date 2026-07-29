@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Protobuf Include="Protos\common.proto" GrpcServices="None" />
     <Protobuf Include="Protos\uniform_chart_of_accounts.proto" GrpcServices="Server" />
     <Protobuf Include="Protos\auth.proto" GrpcServices="Server" />
     <Protobuf Include="Protos\companies.proto" GrpcServices="Server" />
