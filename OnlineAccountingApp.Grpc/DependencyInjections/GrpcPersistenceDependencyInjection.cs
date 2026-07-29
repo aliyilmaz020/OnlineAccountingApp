@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using OnlineAccountingApp.Application.Services;
 using OnlineAccountingApp.Application.Services.CompanyServices;
 using OnlineAccountingApp.Domain.Entities;
@@ -9,13 +9,17 @@ using OnlineAccountingApp.Persistence.Services;
 using OnlineAccountingApp.Persistence.Services.CompanyServices;
 using OnlineAccountingApp.Persistence.Tenancy;
 
-namespace OnlineAccountingApp.WebApi.DependencyInjections.Persistence;
+namespace OnlineAccountingApp.Grpc.DependencyInjections;
 
-public static partial class PersistenceDependencyInjection
+/// <summary>
+/// Local copy of WebApi's PersistenceDependencyInjection, kept in sync by hand: the Grpc host
+/// registers its own AppDbContext/Identity/tenancy pipeline rather than referencing WebApi.
+/// </summary>
+public static class GrpcPersistenceDependencyInjection
 {
     extension(IServiceCollection services)
     {
-        public void AddPersistence(IConfiguration configuration)
+        public void AddGrpcPersistence(IConfiguration configuration)
         {
             services.AddDbContext<AppDbContext>(options =>
             {
@@ -36,12 +40,6 @@ public static partial class PersistenceDependencyInjection
         }
     }
 
-    /// <summary>
-    /// Registers the per-request resolution of the current company's own database.
-    /// Unlike <see cref="AppDbContext"/>, <see cref="CompanyDbContext"/> has no fixed
-    /// connection string: it is built from the <see cref="Company"/> identified by the
-    /// current request, and is only resolved when a company-scoped service asks for it.
-    /// </summary>
     private static void AddCompanyTenancy(IServiceCollection serviceCollection)
     {
         serviceCollection.AddHttpContextAccessor();
@@ -69,8 +67,6 @@ public static partial class PersistenceDependencyInjection
                     $"Company '{companyContext.CompanyId}' was not found.");
             }
 
-            // The header alone is not proof of access: the caller must actually belong to
-            // this company, otherwise any authenticated user could read any tenant's data.
             bool isMember = companyContext.UserId is not null && appDbContext.UserCompanies
                 .AsNoTracking()
                 .Any(uc => uc.AppUserId == companyContext.UserId
@@ -90,4 +86,3 @@ public static partial class PersistenceDependencyInjection
         serviceCollection.AddScoped<ICompanyUnitOfWork, CompanyUnitOfWork>();
     }
 }
-

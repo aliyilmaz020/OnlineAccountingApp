@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+option csharp_namespace = "OnlineAccountingApp.Grpc.Protos";
+
+import "google/protobuf/empty.proto";
+
+package companies;
+
+service Companies {
+  rpc CreateCompany (CreateCompanyRequest) returns (CompanyItem);
+  rpc GetCompanies (GetCompaniesRequest) returns (GetCompaniesResponse);
+  rpc GetCompanyById (GetCompanyByIdRequest) returns (CompanyItem);
+  rpc UpdateCompany (UpdateCompanyRequest) returns (CompanyItem);
+  rpc DeleteCompany (GetCompanyByIdRequest) returns (DeleteCompanyResponse);
+  rpc MigrateCompanyDb (google.protobuf.Empty) returns (MigrateCompanyDbResponse);
+}
+
+message CompanyItem {
+  string id = 1;
+  string name = 2;
+  string address = 3;
+  string identity_number = 4;
+  string tax_department = 5;
+  string phone_number = 6;
+  string email = 7;
+}
+
+message CreateCompanyRequest {
+  string name = 1;
+  string address = 2;
+  string identity_number = 3;
+  string tax_department = 4;
+  string phone_number = 5;
+  string email = 6;
+  string server_name = 7;
+  string database_name = 8;
+  string server_user_id = 9;
+  string server_password = 10;
+}
+
+message UpdateCompanyRequest {
+  string id = 1;
+  string name = 2;
+  string address = 3;
+  string identity_number = 4;
+  string tax_department = 5;
+  string phone_number = 6;
+  string email = 7;
+  string server_name = 8;
+  string database_name = 9;
+  string server_user_id = 10;
+  string server_password = 11;
+}
+
+message GetCompanyByIdRequest {
+  string id = 1;
+}
+
+message GetCompaniesRequest {
+  int32 page_number = 1;
+  int32 page_size = 2;
+  optional string search_term = 3;
+}
+
+message GetCompaniesResponse {
+  repeated CompanyItem items = 1;
+  int32 total_count = 2;
+  int32 page_number = 3;
+  int32 page_size = 4;
+  int32 total_pages = 5;
+}
+
+message DeleteCompanyResponse {
+  bool success = 1;
+}
+
+message MigrateCompanyDbResponse {
+  bool success = 1;
+}

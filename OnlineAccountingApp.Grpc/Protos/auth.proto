@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+option csharp_namespace = "OnlineAccountingApp.Grpc.Protos";
+
+import "google/protobuf/timestamp.proto";
+
+package auth;
+
+service Auth {
+  rpc Login (LoginRequest) returns (AuthResponse);
+  rpc Register (RegisterRequest) returns (AuthResponse);
+  rpc RefreshToken (RefreshTokenRequest) returns (AuthResponse);
+}
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message RegisterRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message RefreshTokenRequest {
+  string refresh_token = 1;
+}
+
+message AuthResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+  google.protobuf.Timestamp access_token_expires_at = 3;
+}

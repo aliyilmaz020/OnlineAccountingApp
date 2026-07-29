@@ -1,0 +1,87 @@
+syntax = "proto3";
+
+option csharp_namespace = "OnlineAccountingApp.Grpc.Protos";
+
+import "google/protobuf/timestamp.proto";
+
+package roles;
+
+service Roles {
+  rpc CreateRole (CreateRoleRequest) returns (RoleItem);
+  rpc GetRoles (GetRolesRequest) returns (GetRolesResponse);
+  rpc GetRoleById (GetRoleByIdRequest) returns (RoleItem);
+  rpc UpdateRole (UpdateRoleRequest) returns (RoleItem);
+  rpc DeleteRole (GetRoleByIdRequest) returns (DeleteRoleResponse);
+  rpc AssignRoleToUser (AssignRoleToUserRequest) returns (AssignRoleToUserResponse);
+  rpc RemoveRoleFromUser (RemoveRoleFromUserRequest) returns (RemoveRoleFromUserResponse);
+  rpc GetUserRoles (GetUserRolesRequest) returns (GetUserRolesResponse);
+}
+
+message RoleItem {
+  string id = 1;
+  string name = 2;
+  string code = 3;
+  bool status = 4;
+  google.protobuf.Timestamp create_date = 5;
+  optional google.protobuf.Timestamp edit_date = 6;
+}
+
+message CreateRoleRequest {
+  string name = 1;
+  string code = 2;
+}
+
+message UpdateRoleRequest {
+  string id = 1;
+  string name = 2;
+  string code = 3;
+  bool status = 4;
+}
+
+message GetRoleByIdRequest {
+  string id = 1;
+}
+
+message GetRolesRequest {
+  int32 page_number = 1;
+  int32 page_size = 2;
+  optional string search_term = 3;
+}
+
+message GetRolesResponse {
+  repeated RoleItem items = 1;
+  int32 total_count = 2;
+  int32 page_number = 3;
+  int32 page_size = 4;
+  int32 total_pages = 5;
+}
+
+message DeleteRoleResponse {
+  bool success = 1;
+}
+
+message AssignRoleToUserRequest {
+  string user_id = 1;
+  string role_code = 2;
+}
+
+message AssignRoleToUserResponse {
+  bool success = 1;
+}
+
+message RemoveRoleFromUserRequest {
+  string user_id = 1;
+  string role_name = 2;
+}
+
+message RemoveRoleFromUserResponse {
+  bool success = 1;
+}
+
+message GetUserRolesRequest {
+  string user_id = 1;
+}
+
+message GetUserRolesResponse {
+  repeated RoleItem items = 1;
+}

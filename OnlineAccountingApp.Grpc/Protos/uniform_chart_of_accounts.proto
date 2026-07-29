@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+option csharp_namespace = "OnlineAccountingApp.Grpc.Protos";
+
+package uniform_chart_of_accounts;
+
+service UniformChartOfAccounts {
+  rpc CreateUniformChartOfAccount (CreateUniformChartOfAccountRequest) returns (UniformChartOfAccountItem);
+  rpc GetUniformChartOfAccounts (GetUniformChartOfAccountsRequest) returns (GetUniformChartOfAccountsResponse);
+  rpc GetUniformChartOfAccountById (GetByIdRequest) returns (UniformChartOfAccountItem);
+  rpc UpdateUniformChartOfAccount (UpdateUniformChartOfAccountRequest) returns (UniformChartOfAccountItem);
+  rpc DeleteUniformChartOfAccount (GetByIdRequest) returns (DeleteResponse);
+}
+
+message UniformChartOfAccountItem {
+  string id = 1;
+  string code = 2;
+  string name = 3;
+  string type = 4;
+}
+
+message CreateUniformChartOfAccountRequest {
+  string code = 1;
+  string name = 2;
+  string type = 3;
+}
+
+message UpdateUniformChartOfAccountRequest {
+  string id = 1;
+  string code = 2;
+  string name = 3;
+  string type = 4;
+}
+
+message GetByIdRequest {
+  string id = 1;
+}
+
+message GetUniformChartOfAccountsRequest {
+  int32 page_number = 1;
+  int32 page_size = 2;
+  optional string search_term = 3;
+}
+
+message GetUniformChartOfAccountsResponse {
+  repeated UniformChartOfAccountItem items = 1;
+  int32 total_count = 2;
+  int32 page_number = 3;
+  int32 page_size = 4;
+  int32 total_pages = 5;
+}
+
+message DeleteResponse {
+  bool success = 1;
+}
