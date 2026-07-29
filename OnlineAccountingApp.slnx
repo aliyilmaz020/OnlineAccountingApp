@@ -8,6 +8,7 @@
     <Project Path="OnlineAccountingApp.Persistence/OnlineAccountingApp.Persistence.csproj" Id="ef5b5776-d26f-4ec4-8911-bae19dda0c92" />
   </Folder>
   <Folder Name="/Presentation/">
+    <Project Path="OnlineAccountingApp.Grpc/OnlineAccountingApp.Grpc.csproj" />
     <Project Path="OnlineAccountingApp.WebApi/OnlineAccountingApp.WebApi.csproj" Id="f79beac4-69c7-4d47-b123-13a74d5bc821" />
   </Folder>
 </Solution>
