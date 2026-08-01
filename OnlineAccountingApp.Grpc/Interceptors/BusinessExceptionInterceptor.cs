@@ -26,6 +26,10 @@ public sealed class BusinessExceptionInterceptor(ILogger<BusinessExceptionInterc
         {
             Metadata trailers = [];
             trailers.Add("error-code", vex.ErrorCode);
+            // Trailers are transported as HTTP/2 header values, which Kestrel rejects if they
+            // contain non-ASCII bytes - keep the default encoder's \uXXXX escaping here rather
+            // than a relaxed one, even though it makes non-ASCII text (e.g. Turkish) less
+            // readable in raw metadata. Clients decode this as JSON, so nothing is lost.
             trailers.Add("errors-json", JsonSerializer.Serialize(vex.Errors));
             throw new RpcException(new Status(StatusCode.InvalidArgument, vex.Message), trailers);
         }
