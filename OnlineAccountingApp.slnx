@@ -12,4 +12,7 @@
     <Project Path="OnlineAccountingApp.Grpc/OnlineAccountingApp.Grpc.csproj" />
     <Project Path="OnlineAccountingApp.WebApi/OnlineAccountingApp.WebApi.csproj" Id="f79beac4-69c7-4d47-b123-13a74d5bc821" />
   </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="OnlineAccountingApp.Application.Tests/OnlineAccountingApp.Application.Tests.csproj" />
+  </Folder>
 </Solution>
