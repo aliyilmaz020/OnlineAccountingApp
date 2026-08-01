@@ -7,14 +7,6 @@ namespace OnlineAccountingApp.Persistence.Services.AppServices;
 
 public sealed class CompanyService(AppDbContext context) : Repository<Company, AppDbContext>(context), ICompanyService
 {
-    private static readonly Func<AppDbContext, string, Task<Company?>> GetCompanyByNameAsyncCompiled = EF.CompileAsyncQuery((AppDbContext dbContext, string name) =>
-        dbContext.Companies.FirstOrDefault(c => c.Name == name));
-
-    public async Task<Company?> GetCompanyByNameAsync(string name)
-    {
-        return await GetCompanyByNameAsyncCompiled(context, name);
-    }
-
     public async Task<bool> MigrateCompanyDbAsync()
     {
         var companies = await context.Set<Company>().Where(c => c.Deleted == false).ToListAsync();

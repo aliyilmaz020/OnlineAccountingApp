@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using OnlineAccountingApp.Application.Services;
 using OnlineAccountingApp.Application.Services.CompanyServices;
 using OnlineAccountingApp.Domain.Entities;
 using OnlineAccountingApp.Domain.Entities.Identity;
 using OnlineAccountingApp.Domain.Exceptions;
+using OnlineAccountingApp.Framework.Services;
 using OnlineAccountingApp.Persistence.Context;
 using OnlineAccountingApp.Persistence.Services;
 using OnlineAccountingApp.Persistence.Services.CompanyServices;

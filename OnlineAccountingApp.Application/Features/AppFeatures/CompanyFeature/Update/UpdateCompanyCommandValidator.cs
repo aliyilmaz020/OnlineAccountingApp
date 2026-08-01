@@ -1,12 +1,12 @@
 using FluentValidation;
+using OnlineAccountingApp.Framework.MedatR.Update;
 
 namespace OnlineAccountingApp.Application.Features.AppFeatures.CompanyFeature.Update;
 
-public sealed class UpdateCompanyCommandValidator : AbstractValidator<UpdateCompanyCommand>
+public sealed class UpdateCompanyCommandValidator : BaseUpdateCommandValidator<UpdateCompanyCommand>
 {
-    public UpdateCompanyCommandValidator()
+    protected override void ConfigureRules()
     {
-        RuleFor(command => command.Id).NotEmpty();
         RuleFor(command => command.Name).NotEmpty().MaximumLength(200);
         RuleFor(command => command.Address).NotEmpty();
         RuleFor(command => command.IdentityNumber).NotEmpty();

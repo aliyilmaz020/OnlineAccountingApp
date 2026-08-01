@@ -1,22 +1,15 @@
-using Mapster;
-using MediatR;
 using OnlineAccountingApp.Application.Features.AppFeatures.CompanyFeature.GetCompanies;
-using OnlineAccountingApp.Application.Services.AppServices;
 using OnlineAccountingApp.Domain.Entities;
 using OnlineAccountingApp.Domain.Exceptions;
+using OnlineAccountingApp.Framework.MedatR.GetById;
+using OnlineAccountingApp.Framework.Services;
 
 namespace OnlineAccountingApp.Application.Features.AppFeatures.CompanyFeature.GetCompanyById;
 
-public sealed class GetCompanyByIdQueryHandler(ICompanyService companyService) : IRequestHandler<GetCompanyByIdQuery, CompanyListItemDto>
+public sealed class GetCompanyByIdQueryHandler(IUnitOfWork unitOfWork)
+    : BaseGetByIdQueryHandler<GetCompanyByIdQuery, Company, CompanyListItemDto>(unitOfWork)
 {
-    public async Task<CompanyListItemDto> Handle(GetCompanyByIdQuery request, CancellationToken cancellationToken)
-    {
-        Company? company = await companyService.GetByIdAsync(request.Id, cancellationToken);
-        if (company is null)
-        {
-            throw new BusinessException(AppErrorCodes.Company.NotFound, "Company not found.");
-        }
+    protected override string GetNotFoundErrorCode() => AppErrorCodes.Company.NotFound;
 
-        return company.Adapt<CompanyListItemDto>();
-    }
+    protected override string GetNotFoundErrorMessage() => "Company not found.";
 }

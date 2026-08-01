@@ -1,11 +1,7 @@
-using FluentValidation;
+using OnlineAccountingApp.Framework.MedatR.Delete;
 
 namespace OnlineAccountingApp.Application.Features.AppFeatures.CompanyFeature.Delete;
 
-public sealed class DeleteCompanyCommandValidator : AbstractValidator<DeleteCompanyCommand>
+public sealed class DeleteCompanyCommandValidator : BaseDeleteCommandValidator<DeleteCompanyCommand>
 {
-    public DeleteCompanyCommandValidator()
-    {
-        RuleFor(command => command.Id).NotEmpty();
-    }
 }

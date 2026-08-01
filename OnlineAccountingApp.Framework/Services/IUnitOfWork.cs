@@ -1,6 +1,6 @@
 using OnlineAccountingApp.Domain.Abstracts;
 
-namespace OnlineAccountingApp.Application.Services;
+namespace OnlineAccountingApp.Framework.Services;
 
 public interface IUnitOfWork : IDisposable
 {

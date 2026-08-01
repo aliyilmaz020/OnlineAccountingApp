@@ -8,7 +8,7 @@ using OnlineAccountingApp.Application.Features.AppFeatures.CompanyFeature.GetCom
 using OnlineAccountingApp.Application.Features.AppFeatures.CompanyFeature.GetCompanyById;
 using OnlineAccountingApp.Application.Features.AppFeatures.CompanyFeature.MigrateCompanyDb;
 using OnlineAccountingApp.Application.Features.AppFeatures.CompanyFeature.Update;
-using OnlineAccountingApp.Application.Services;
+using OnlineAccountingApp.Framework.Services;
 using OnlineAccountingApp.Grpc.Protos;
 
 namespace OnlineAccountingApp.Grpc.Services;

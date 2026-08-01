@@ -1,10 +1,11 @@
 using FluentValidation;
+using OnlineAccountingApp.Framework.MedatR.Create;
 
 namespace OnlineAccountingApp.Application.Features.CompanyFeatures.UniformChartOfAccountFeature.Create;
 
-public sealed class CreateUniformChartOfAccountCommandValidator : AbstractValidator<CreateUniformChartOfAccountCommand>
+public sealed class CreateUniformChartOfAccountCommandValidator : BaseCreateCommandValidator<CreateUniformChartOfAccountCommand>
 {
-    public CreateUniformChartOfAccountCommandValidator()
+    protected override void ConfigureRules()
     {
         RuleFor(command => command.Code).NotEmpty().MaximumLength(50);
         RuleFor(command => command.Name).NotEmpty().MaximumLength(200);

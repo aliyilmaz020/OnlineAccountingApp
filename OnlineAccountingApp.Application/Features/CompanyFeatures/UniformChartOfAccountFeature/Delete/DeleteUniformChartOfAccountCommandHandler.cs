@@ -1,23 +1,25 @@
-using MediatR;
 using OnlineAccountingApp.Application.Services.CompanyServices;
 using OnlineAccountingApp.Domain.CompanyEntities;
 using OnlineAccountingApp.Domain.Exceptions;
+using OnlineAccountingApp.Framework.MedatR.Delete;
 
 namespace OnlineAccountingApp.Application.Features.CompanyFeatures.UniformChartOfAccountFeature.Delete;
 
-public sealed class DeleteUniformChartOfAccountCommandHandler(IUniformChartOfAccountService uniformChartOfAccountService, ICompanyUnitOfWork unitOfWork) : IRequestHandler<DeleteUniformChartOfAccountCommand, bool>
+public sealed class DeleteUniformChartOfAccountCommandHandler(ICompanyUnitOfWork unitOfWork)
+    : BaseDeleteCommandHandler<DeleteUniformChartOfAccountCommand, UniformChartOfAccount>(unitOfWork)
 {
-    public async Task<bool> Handle(DeleteUniformChartOfAccountCommand request, CancellationToken cancellationToken)
+    protected override async Task<UniformChartOfAccount> GetExistingEntityAsync(DeleteUniformChartOfAccountCommand request, CancellationToken cancellationToken)
     {
-        UniformChartOfAccount? existingAccount = await uniformChartOfAccountService.GetByIdAsync(request.Id, cancellationToken);
-        if (existingAccount is null || existingAccount.Deleted)
+        UniformChartOfAccount? entity = await Repository.GetByIdAsync(request.Id, cancellationToken);
+        if (entity is null || entity.Deleted)
         {
-            throw new BusinessException(AppErrorCodes.UniformChartOfAccount.NotFound, "Uniform chart of account not found.");
+            throw new BusinessException(GetNotFoundErrorCode(), GetNotFoundErrorMessage());
         }
 
-        await unitOfWork.BeginTransactionAsync(cancellationToken);
-        bool result = await uniformChartOfAccountService.SoftDeleteAsync(existingAccount, cancellationToken);
-        await unitOfWork.CommitAsync(cancellationToken);
-        return result;
+        return entity;
     }
+
+    protected override string GetNotFoundErrorCode() => AppErrorCodes.UniformChartOfAccount.NotFound;
+
+    protected override string GetNotFoundErrorMessage() => "Uniform chart of account not found.";
 }

@@ -1,10 +1,11 @@
 using FluentValidation;
+using OnlineAccountingApp.Framework.MedatR.Create;
 
 namespace OnlineAccountingApp.Application.Features.AppFeatures.CompanyFeature.Create;
 
-public sealed class CreateCompanyCommandValidator : AbstractValidator<CreateCompanyCommand>
+public sealed class CreateCompanyCommandValidator : BaseCreateCommandValidator<CreateCompanyCommand>
 {
-    public CreateCompanyCommandValidator()
+    protected override void ConfigureRules()
     {
         RuleFor(command => command.Name).NotEmpty().MaximumLength(200);
         RuleFor(command => command.Address).NotEmpty();

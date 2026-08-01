@@ -1,35 +1,23 @@
-using Mapster;
-using MediatR;
 using OnlineAccountingApp.Application.Features.AppFeatures.CompanyFeature.GetCompanies;
-using OnlineAccountingApp.Application.Services;
-using OnlineAccountingApp.Application.Services.AppServices;
 using OnlineAccountingApp.Domain.Entities;
 using OnlineAccountingApp.Domain.Exceptions;
+using OnlineAccountingApp.Framework.MedatR.Update;
+using OnlineAccountingApp.Framework.Services;
+using System.Linq.Expressions;
 
 namespace OnlineAccountingApp.Application.Features.AppFeatures.CompanyFeature.Update;
 
-public sealed class UpdateCompanyCommandHandler(ICompanyService companyService, IUnitOfWork unitOfWork) : IRequestHandler<UpdateCompanyCommand, CompanyListItemDto>
+public sealed class UpdateCompanyCommandHandler(IUnitOfWork unitOfWork)
+    : BaseUpdateCommandHandler<UpdateCompanyCommand, Company, CompanyListItemDto>(unitOfWork)
 {
-    public async Task<CompanyListItemDto> Handle(UpdateCompanyCommand request, CancellationToken cancellationToken)
-    {
-        Company? existingCompany = await companyService.GetByIdAsync(request.Id, cancellationToken);
-        if (existingCompany is null)
-        {
-            throw new BusinessException(AppErrorCodes.Company.NotFound, "Company not found.");
-        }
+    protected override Expression<Func<Company, bool>>? GetConflictPredicate(UpdateCompanyCommand request, Company entity)
+        => company => company.Name == request.Name && company.Id != request.Id;
 
-        Company? companyWithSameName = await companyService.GetCompanyByNameAsync(request.Name);
-        if (companyWithSameName is not null && companyWithSameName.Id != request.Id)
-        {
-            throw new BusinessException(AppErrorCodes.Company.AlreadyExists, "A company with the same name already exists.");
-        }
+    protected override string GetNotFoundErrorCode() => AppErrorCodes.Company.NotFound;
 
-        request.Adapt(existingCompany);
+    protected override string GetNotFoundErrorMessage() => "Company not found.";
 
-        await unitOfWork.BeginTransactionAsync(cancellationToken);
-        Company updatedCompany = await companyService.UpdateAsync(existingCompany, cancellationToken);
-        await unitOfWork.CommitAsync(cancellationToken);
+    protected override string GetConflictErrorCode() => AppErrorCodes.Company.AlreadyExists;
 
-        return updatedCompany.Adapt<CompanyListItemDto>();
-    }
+    protected override string GetConflictErrorMessage() => "A company with the same name already exists.";
 }

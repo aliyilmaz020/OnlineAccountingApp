@@ -10,7 +10,7 @@ using OnlineAccountingApp.Application.Features.AppFeatures.RoleFeature.GetRoles;
 using OnlineAccountingApp.Application.Features.AppFeatures.RoleFeature.GetUserRoles;
 using OnlineAccountingApp.Application.Features.AppFeatures.RoleFeature.RemoveRoleFromUser;
 using OnlineAccountingApp.Application.Features.AppFeatures.RoleFeature.Update;
-using OnlineAccountingApp.Application.Services;
+using OnlineAccountingApp.Framework.Services;
 using OnlineAccountingApp.Grpc.Protos;
 
 namespace OnlineAccountingApp.Grpc.Services;

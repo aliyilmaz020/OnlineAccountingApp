@@ -6,6 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\OnlineAccountingApp.Domain\OnlineAccountingApp.Domain.csproj" />
+    <ProjectReference Include="..\OnlineAccountingApp.Framework\OnlineAccountingApp.Framework.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />

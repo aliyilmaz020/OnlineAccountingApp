@@ -1,11 +1,8 @@
-using MediatR;
-using OnlineAccountingApp.Application.Services;
+using OnlineAccountingApp.Framework.MedatR.GetList;
 
 namespace OnlineAccountingApp.Application.Features.AppFeatures.CompanyFeature.GetCompanies;
 
-public sealed class GetCompaniesQuery : IRequest<PagedResult<CompanyListItemDto>>
+public sealed class GetCompaniesQuery : BaseGetListQuery<CompanyListItemDto>
 {
-    public int PageNumber { get; set; } = 1;
-    public int PageSize { get; set; } = 20;
     public string? SearchTerm { get; set; }
 }

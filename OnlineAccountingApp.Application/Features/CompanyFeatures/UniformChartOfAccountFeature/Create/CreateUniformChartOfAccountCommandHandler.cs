@@ -1,30 +1,26 @@
-using Mapster;
-using MediatR;
 using OnlineAccountingApp.Application.Features.CompanyFeatures.UniformChartOfAccountFeature.GetList;
 using OnlineAccountingApp.Application.Services.CompanyServices;
 using OnlineAccountingApp.Domain.CompanyEntities;
 using OnlineAccountingApp.Domain.Exceptions;
+using OnlineAccountingApp.Framework.MedatR.Create;
+using System.Linq.Expressions;
 
 namespace OnlineAccountingApp.Application.Features.CompanyFeatures.UniformChartOfAccountFeature.Create;
 
-public sealed class CreateUniformChartOfAccountCommandHandler(IUniformChartOfAccountService uniformChartOfAccountService, ICompanyUnitOfWork unitOfWork) : IRequestHandler<CreateUniformChartOfAccountCommand, UniformChartOfAccountListItemDto>
+public sealed class CreateUniformChartOfAccountCommandHandler(ICompanyUnitOfWork unitOfWork)
+    : BaseCreateCommandHandler<CreateUniformChartOfAccountCommand, UniformChartOfAccount, UniformChartOfAccountListItemDto>(unitOfWork)
 {
-    public async Task<UniformChartOfAccountListItemDto> Handle(CreateUniformChartOfAccountCommand request, CancellationToken cancellationToken)
+    protected override Expression<Func<UniformChartOfAccount, bool>>? GetExistsPredicate(CreateUniformChartOfAccountCommand request)
+        => account => account.Code == request.Code && !account.Deleted;
+
+    protected override Task BeforeCreateAsync(UniformChartOfAccount entity, CreateUniformChartOfAccountCommand request, CancellationToken cancellationToken)
     {
-        UniformChartOfAccount? existingAccount = await uniformChartOfAccountService.GetByCodeAsync(request.Code, cancellationToken);
-        if (existingAccount is not null)
-        {
-            throw new BusinessException(AppErrorCodes.UniformChartOfAccount.AlreadyExists, "A uniform chart of account with the same code already exists.");
-        }
-
-        var account = request.Adapt<UniformChartOfAccount>();
-        account.CreateDate = DateTime.UtcNow;
-        account.Status = true;
-
-        await unitOfWork.BeginTransactionAsync(cancellationToken);
-        UniformChartOfAccount createdAccount = await uniformChartOfAccountService.CreateAsync(account, cancellationToken);
-        await unitOfWork.CommitAsync(cancellationToken);
-
-        return createdAccount.Adapt<UniformChartOfAccountListItemDto>();
+        entity.CreateDate = DateTime.UtcNow;
+        entity.Status = true;
+        return Task.CompletedTask;
     }
+
+    protected override string GetAlreadyExistsErrorCode() => AppErrorCodes.UniformChartOfAccount.AlreadyExists;
+
+    protected override string GetAlreadyExistsErrorMessage() => "A uniform chart of account with the same code already exists.";
 }

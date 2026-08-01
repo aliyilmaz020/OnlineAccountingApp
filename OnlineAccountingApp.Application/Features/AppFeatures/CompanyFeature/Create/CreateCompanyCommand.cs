@@ -1,9 +1,9 @@
-﻿using MediatR;
-using OnlineAccountingApp.Application.Features.AppFeatures.CompanyFeature.GetCompanies;
+﻿using OnlineAccountingApp.Application.Features.AppFeatures.CompanyFeature.GetCompanies;
+using OnlineAccountingApp.Framework.MedatR.Create;
 
 namespace OnlineAccountingApp.Application.Features.AppFeatures.CompanyFeature.Create;
 
-public sealed class CreateCompanyCommand : IRequest<CompanyListItemDto>
+public sealed class CreateCompanyCommand : BaseCreateCommand<CompanyListItemDto>
 {
     public string Name { get; set; }
     public string Address { get; set; }

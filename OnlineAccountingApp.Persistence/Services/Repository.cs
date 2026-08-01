@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using OnlineAccountingApp.Application.Services;
 using OnlineAccountingApp.Domain.Abstracts;
+using OnlineAccountingApp.Framework.Services;
 using System.Linq.Expressions;
 
 namespace OnlineAccountingApp.Persistence.Services;

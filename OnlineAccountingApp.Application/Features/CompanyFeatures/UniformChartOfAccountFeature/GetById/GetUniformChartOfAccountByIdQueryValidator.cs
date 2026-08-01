@@ -1,11 +1,7 @@
-using FluentValidation;
+using OnlineAccountingApp.Framework.MedatR.GetById;
 
 namespace OnlineAccountingApp.Application.Features.CompanyFeatures.UniformChartOfAccountFeature.GetById;
 
-public sealed class GetUniformChartOfAccountByIdQueryValidator : AbstractValidator<GetUniformChartOfAccountByIdQuery>
+public sealed class GetUniformChartOfAccountByIdQueryValidator : BaseGetByIdQueryValidator<GetUniformChartOfAccountByIdQuery>
 {
-    public GetUniformChartOfAccountByIdQueryValidator()
-    {
-        RuleFor(query => query.Id).NotEmpty();
-    }
 }

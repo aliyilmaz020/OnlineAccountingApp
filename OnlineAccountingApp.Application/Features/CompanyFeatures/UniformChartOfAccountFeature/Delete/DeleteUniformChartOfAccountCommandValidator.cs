@@ -1,11 +1,7 @@
-using FluentValidation;
+using OnlineAccountingApp.Framework.MedatR.Delete;
 
 namespace OnlineAccountingApp.Application.Features.CompanyFeatures.UniformChartOfAccountFeature.Delete;
 
-public sealed class DeleteUniformChartOfAccountCommandValidator : AbstractValidator<DeleteUniformChartOfAccountCommand>
+public sealed class DeleteUniformChartOfAccountCommandValidator : BaseDeleteCommandValidator<DeleteUniformChartOfAccountCommand>
 {
-    public DeleteUniformChartOfAccountCommandValidator()
-    {
-        RuleFor(command => command.Id).NotEmpty();
-    }
 }

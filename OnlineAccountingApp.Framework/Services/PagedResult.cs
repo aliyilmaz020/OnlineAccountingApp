@@ -1,4 +1,4 @@
-namespace OnlineAccountingApp.Application.Services;
+namespace OnlineAccountingApp.Framework.Services;
 
 public sealed class PagedResult<T>
 {

@@ -1,3 +1,5 @@
+using OnlineAccountingApp.Framework.Services;
+
 namespace OnlineAccountingApp.Application.Services.CompanyServices;
 
 /// <summary>

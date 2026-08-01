@@ -1,11 +1,8 @@
-using MediatR;
-using OnlineAccountingApp.Application.Services;
+using OnlineAccountingApp.Framework.MedatR.GetList;
 
 namespace OnlineAccountingApp.Application.Features.CompanyFeatures.UniformChartOfAccountFeature.GetList;
 
-public sealed class GetUniformChartOfAccountsQuery : IRequest<PagedResult<UniformChartOfAccountListItemDto>>
+public sealed class GetUniformChartOfAccountsQuery : BaseGetListQuery<UniformChartOfAccountListItemDto>
 {
-    public int PageNumber { get; set; } = 1;
-    public int PageSize { get; set; } = 20;
     public string? SearchTerm { get; set; }
 }

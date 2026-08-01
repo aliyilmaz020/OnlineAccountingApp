@@ -6,7 +6,7 @@ using OnlineAccountingApp.Application.Features.CompanyFeatures.UniformChartOfAcc
 using OnlineAccountingApp.Application.Features.CompanyFeatures.UniformChartOfAccountFeature.GetById;
 using OnlineAccountingApp.Application.Features.CompanyFeatures.UniformChartOfAccountFeature.GetList;
 using OnlineAccountingApp.Application.Features.CompanyFeatures.UniformChartOfAccountFeature.Update;
-using OnlineAccountingApp.Application.Services;
+using OnlineAccountingApp.Framework.Services;
 using OnlineAccountingApp.Grpc.Protos;
 
 namespace OnlineAccountingApp.Grpc.Services;

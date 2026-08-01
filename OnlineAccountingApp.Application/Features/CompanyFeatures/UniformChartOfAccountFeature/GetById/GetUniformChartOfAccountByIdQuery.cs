@@ -1,9 +1,8 @@
-using MediatR;
 using OnlineAccountingApp.Application.Features.CompanyFeatures.UniformChartOfAccountFeature.GetList;
+using OnlineAccountingApp.Framework.MedatR.GetById;
 
 namespace OnlineAccountingApp.Application.Features.CompanyFeatures.UniformChartOfAccountFeature.GetById;
 
-public sealed class GetUniformChartOfAccountByIdQuery : IRequest<UniformChartOfAccountListItemDto>
+public sealed class GetUniformChartOfAccountByIdQuery : BaseGetByIdQuery<UniformChartOfAccountListItemDto>
 {
-    public string Id { get; set; }
 }

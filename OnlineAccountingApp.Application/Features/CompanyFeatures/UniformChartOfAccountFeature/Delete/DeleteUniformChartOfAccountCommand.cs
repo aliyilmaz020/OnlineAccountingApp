@@ -1,8 +1,7 @@
-using MediatR;
+using OnlineAccountingApp.Framework.MedatR.Delete;
 
 namespace OnlineAccountingApp.Application.Features.CompanyFeatures.UniformChartOfAccountFeature.Delete;
 
-public sealed class DeleteUniformChartOfAccountCommand : IRequest<bool>
+public sealed class DeleteUniformChartOfAccountCommand : BaseDeleteCommand
 {
-    public string Id { get; set; }
 }

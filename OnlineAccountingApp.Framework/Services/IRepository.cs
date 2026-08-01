@@ -1,7 +1,7 @@
 using OnlineAccountingApp.Domain.Abstracts;
 using System.Linq.Expressions;
 
-namespace OnlineAccountingApp.Application.Services;
+namespace OnlineAccountingApp.Framework.Services;
 
 public interface IRepository<T> where T : BaseEntity
 {

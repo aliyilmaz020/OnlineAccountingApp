@@ -1,22 +1,19 @@
-using Mapster;
-using MediatR;
 using OnlineAccountingApp.Application.Features.CompanyFeatures.UniformChartOfAccountFeature.GetList;
 using OnlineAccountingApp.Application.Services.CompanyServices;
 using OnlineAccountingApp.Domain.CompanyEntities;
 using OnlineAccountingApp.Domain.Exceptions;
+using OnlineAccountingApp.Framework.MedatR.GetById;
+using System.Linq.Expressions;
 
 namespace OnlineAccountingApp.Application.Features.CompanyFeatures.UniformChartOfAccountFeature.GetById;
 
-public sealed class GetUniformChartOfAccountByIdQueryHandler(IUniformChartOfAccountService uniformChartOfAccountService) : IRequestHandler<GetUniformChartOfAccountByIdQuery, UniformChartOfAccountListItemDto>
+public sealed class GetUniformChartOfAccountByIdQueryHandler(ICompanyUnitOfWork unitOfWork)
+    : BaseGetByIdQueryHandler<GetUniformChartOfAccountByIdQuery, UniformChartOfAccount, UniformChartOfAccountListItemDto>(unitOfWork)
 {
-    public async Task<UniformChartOfAccountListItemDto> Handle(GetUniformChartOfAccountByIdQuery request, CancellationToken cancellationToken)
-    {
-        UniformChartOfAccount? account = await uniformChartOfAccountService.GetByIdAsync(request.Id, cancellationToken);
-        if (account is null || account.Deleted)
-        {
-            throw new BusinessException(AppErrorCodes.UniformChartOfAccount.NotFound, "Uniform chart of account not found.");
-        }
+    protected override Expression<Func<UniformChartOfAccount, bool>> BuildPredicate(GetUniformChartOfAccountByIdQuery request)
+        => account => account.Id == request.Id && !account.Deleted;
 
-        return account.Adapt<UniformChartOfAccountListItemDto>();
-    }
+    protected override string GetNotFoundErrorCode() => AppErrorCodes.UniformChartOfAccount.NotFound;
+
+    protected override string GetNotFoundErrorMessage() => "Uniform chart of account not found.";
 }

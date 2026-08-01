@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore.Storage;
-using OnlineAccountingApp.Application.Services;
 using OnlineAccountingApp.Application.Services.CompanyServices;
 using OnlineAccountingApp.Domain.Abstracts;
+using OnlineAccountingApp.Framework.Services;
 using OnlineAccountingApp.Persistence.Context;
 
 namespace OnlineAccountingApp.Persistence.Services.CompanyServices;

@@ -1,32 +1,15 @@
-using Mapster;
-using MediatR;
-using OnlineAccountingApp.Application.Services;
-using OnlineAccountingApp.Application.Services.AppServices;
 using OnlineAccountingApp.Domain.Entities;
+using OnlineAccountingApp.Framework.MedatR.GetList;
+using OnlineAccountingApp.Framework.Services;
 using System.Linq.Expressions;
 
 namespace OnlineAccountingApp.Application.Features.AppFeatures.CompanyFeature.GetCompanies;
 
-public sealed class GetCompaniesQueryHandler(ICompanyService companyService) : IRequestHandler<GetCompaniesQuery, PagedResult<CompanyListItemDto>>
+public sealed class GetCompaniesQueryHandler(IUnitOfWork unitOfWork)
+    : BaseGetListQueryHandler<GetCompaniesQuery, Company, CompanyListItemDto>(unitOfWork)
 {
-    public async Task<PagedResult<CompanyListItemDto>> Handle(GetCompaniesQuery request, CancellationToken cancellationToken)
-    {
-        Expression<Func<Company, bool>>? predicate = string.IsNullOrWhiteSpace(request.SearchTerm)
+    protected override Expression<Func<Company, bool>>? BuildPredicate(GetCompaniesQuery request)
+        => string.IsNullOrWhiteSpace(request.SearchTerm)
             ? null
             : company => company.Name.Contains(request.SearchTerm);
-
-        PagedResult<Company> paged = await companyService.GetPagedAsync(
-            request.PageNumber,
-            request.PageSize,
-            predicate,
-            cancellationToken: cancellationToken);
-
-        return new PagedResult<CompanyListItemDto>
-        {
-            Items = paged.Items.Adapt<List<CompanyListItemDto>>(),
-            TotalCount = paged.TotalCount,
-            PageNumber = paged.PageNumber,
-            PageSize = paged.PageSize
-        };
-    }
 }

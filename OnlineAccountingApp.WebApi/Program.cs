@@ -1,4 +1,5 @@
 using OnlineAccountingApp.WebApi.Configurations;
+using OnlineAccountingApp.WebApi.DependencyInjections;
 using OnlineAccountingApp.WebApi.DependencyInjections.Application;
 using OnlineAccountingApp.WebApi.DependencyInjections.Infrastructure;
 using OnlineAccountingApp.WebApi.DependencyInjections.Persistence;
@@ -21,6 +22,7 @@ builder.Services.AddPersistence(builder.Configuration);
 builder.Services.AddConfigureAuthentication(builder.Configuration);
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
+builder.Services.AddHostedService<HealthCheckStartupService>();
 
 var app = builder.Build();
 
@@ -40,5 +42,4 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
 app.Run();

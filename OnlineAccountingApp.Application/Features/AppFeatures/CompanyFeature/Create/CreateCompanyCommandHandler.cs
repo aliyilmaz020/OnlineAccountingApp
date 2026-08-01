@@ -1,28 +1,19 @@
-﻿using Mapster;
-using MediatR;
 using OnlineAccountingApp.Application.Features.AppFeatures.CompanyFeature.GetCompanies;
-using OnlineAccountingApp.Application.Services;
-using OnlineAccountingApp.Application.Services.AppServices;
 using OnlineAccountingApp.Domain.Entities;
 using OnlineAccountingApp.Domain.Exceptions;
+using OnlineAccountingApp.Framework.MedatR.Create;
+using OnlineAccountingApp.Framework.Services;
+using System.Linq.Expressions;
 
 namespace OnlineAccountingApp.Application.Features.AppFeatures.CompanyFeature.Create;
 
-public sealed class CreateCompanyCommandHandler(ICompanyService companyService, IUnitOfWork unitOfWork) : IRequestHandler<CreateCompanyCommand, CompanyListItemDto>
+public class CreateCompanyCommandHandler(IUnitOfWork unitOfWork)
+    : BaseCreateCommandHandler<CreateCompanyCommand, Company, CompanyListItemDto>(unitOfWork)
 {
-    public async Task<CompanyListItemDto> Handle(CreateCompanyCommand request, CancellationToken cancellationToken)
-    {
-        Company? existingCompany = await companyService.GetCompanyByNameAsync(request.Name);
-        if (existingCompany is not null)
-        {
-            throw new BusinessException(AppErrorCodes.Company.AlreadyExists, "A company with the same name already exists.");
-        }
-        var company = request.Adapt<Company>();
+    protected override Expression<Func<Company, bool>>? GetExistsPredicate(CreateCompanyCommand request)
+        => company => company.Name == request.Name;
 
-        await unitOfWork.BeginTransactionAsync(cancellationToken);
-        Company createdCompany = await companyService.CreateAsync(company, cancellationToken);
-        await unitOfWork.CommitAsync(cancellationToken);
+    protected override string GetAlreadyExistsErrorCode() => AppErrorCodes.Company.AlreadyExists;
 
-        return createdCompany.Adapt<CompanyListItemDto>();
-    }
+    protected override string GetAlreadyExistsErrorMessage() => "A company with the same name already exists.";
 }

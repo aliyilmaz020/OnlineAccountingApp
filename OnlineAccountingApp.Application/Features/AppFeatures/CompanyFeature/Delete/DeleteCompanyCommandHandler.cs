@@ -1,24 +1,14 @@
-using MediatR;
-using OnlineAccountingApp.Application.Services;
-using OnlineAccountingApp.Application.Services.AppServices;
 using OnlineAccountingApp.Domain.Entities;
 using OnlineAccountingApp.Domain.Exceptions;
+using OnlineAccountingApp.Framework.MedatR.Delete;
+using OnlineAccountingApp.Framework.Services;
 
 namespace OnlineAccountingApp.Application.Features.AppFeatures.CompanyFeature.Delete;
 
-public sealed class DeleteCompanyCommandHandler(ICompanyService companyService, IUnitOfWork unitOfWork) : IRequestHandler<DeleteCompanyCommand, bool>
+public sealed class DeleteCompanyCommandHandler(IUnitOfWork unitOfWork)
+    : BaseDeleteCommandHandler<DeleteCompanyCommand, Company>(unitOfWork)
 {
-    public async Task<bool> Handle(DeleteCompanyCommand request, CancellationToken cancellationToken)
-    {
-        Company? existingCompany = await companyService.GetByIdAsync(request.Id, cancellationToken);
-        if (existingCompany is null)
-        {
-            throw new BusinessException(AppErrorCodes.Company.NotFound, "Company not found.");
-        }
+    protected override string GetNotFoundErrorCode() => AppErrorCodes.Company.NotFound;
 
-        await unitOfWork.BeginTransactionAsync(cancellationToken);
-        bool result = await companyService.SoftDeleteAsync(existingCompany, cancellationToken);
-        await unitOfWork.CommitAsync(cancellationToken);
-        return result;
-    }
+    protected override string GetNotFoundErrorMessage() => "Company not found.";
 }

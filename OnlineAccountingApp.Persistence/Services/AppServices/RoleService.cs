@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using OnlineAccountingApp.Application.Services;
 using OnlineAccountingApp.Application.Services.AppServices;
 using OnlineAccountingApp.Domain.Entities.Identity;
+using OnlineAccountingApp.Framework.Services;
 using DomainValidationException = OnlineAccountingApp.Domain.Exceptions.ValidationException;
 
 namespace OnlineAccountingApp.Persistence.Services.AppServices;

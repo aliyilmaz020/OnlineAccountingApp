@@ -174,11 +174,15 @@ OnlineAccountingApp/
 │   ├── CompanyEntities/                 # Şirket DB: UniformChartOfAccount
 │   └── Exceptions/                      # BusinessException, ValidationException, AppErrorCodes
 │
-├── OnlineAccountingApp.Application/     # Kullanım senaryoları (yalnızca Domain'e bağlı)
+├── OnlineAccountingApp.Framework/       # Genel amaçlı MediatR altyapısı (yalnızca Domain'e bağlı)
+│   ├── Services/                        # IRepository, IUnitOfWork, PagedResult
+│   └── MedatR/Create|Update|Delete|GetById|GetList/
+│                                         # BaseXCommand/Query, BaseXCommandHandler, BaseXCommandValidator
+│
+├── OnlineAccountingApp.Application/     # Kullanım senaryoları (Domain + Framework'e bağlı)
 │   ├── Features/AppFeatures/            # Master DB feature'ları (CQRS)
 │   ├── Features/CompanyFeatures/        # Şirket DB feature'ları (CQRS)
-│   ├── Services/                        # IRepository, IUnitOfWork, PagedResult
-│   ├── Services/AppServices/            # ICompanyService
+│   ├── Services/AppServices/            # ICompanyService, IRoleService, IRefreshTokenService, ...
 │   ├── Services/CompanyServices/        # ICompanyContext, ICompanyUnitOfWork, IUniformChartOfAccountService
 │   ├── Behaviors/ValidationBehavior.cs  # MediatR pipeline doğrulaması
 │   └── Mapper/MapsterConfig.cs
@@ -217,6 +221,32 @@ public async Task<IActionResult> CreateCompany([FromBody] CreateCompanyCommand c
     return Ok(result);
 }
 ```
+
+### `OnlineAccountingApp.Framework`
+
+`Domain`'in hemen üstünde, `Application`'ın altında yer alan bağımsız bir katmandır. İki şey sağlar:
+
+- `Services/IRepository<T>`, `IUnitOfWork`, `PagedResult<T>` — genel veri erişim soyutlamaları.
+- `MedatR/Create|Update|Delete|GetById|GetList/` — her aksiyon için şablon-metot (template method)
+  tabanlı base command/query, handler ve validator sınıfları (`BaseCreateCommand<TResponse>`,
+  `BaseCreateCommandHandler<TCommand, TEntity, TResponse>`, `BaseCreateCommandValidator<TCommand>`
+  ve diğer dört aksiyon için eşleniği). Handler'ların `Handle()` akışı sabittir; özelleştirme
+  `virtual` metotlar üzerinden yapılır:
+
+  | Metot | Ne için |
+  | --- | --- |
+  | `GetExistsPredicate` (Create) / `GetConflictPredicate` (Update) | Benzersizlik kontrolü |
+  | `BuildPredicate`, `GetIncludes` (GetById / GetList) | Sorgu filtresi, eager-load |
+  | `Before/AfterCreateAsync`, `Before/AfterUpdateAsync`, `Before/AfterDeleteAsync` | Persist öncesi/sonrası ek mantık |
+  | `GetNotFoundErrorCode/Message`, `GetAlreadyExistsErrorCode/Message`, `GetConflictErrorCode/Message` | Entity'ye özgü `AppErrorCodes` ve mesaj |
+
+  `Company` ve `UniformChartOfAccount` feature'ları bu altyapıyı kullanır (bkz.
+  `CreateCompanyCommandHandler`, `CreateUniformChartOfAccountCommandHandler`).
+
+> **Not:** `AppRole`, `BaseEntity`'den değil ASP.NET Identity'nin `IdentityRole<string>`'ından
+> türer ve `IRoleService`, `IRepository<T>` implemente etmez. Bu yüzden `RoleFeature` bu base
+> sınıflara uymaz ve doğrudan `IRequest<T>` / `IRequestHandler<,>` / `AbstractValidator<T>`
+> kullanmaya devam eder.
 
 ## Çok Kiracılılık Modeli
 
@@ -405,14 +435,28 @@ Feature'lar hedef veritabanına göre ayrılır:
 - Master veritabanı → `Application/Features/AppFeatures/<Feature>/<Action>/`
 - Şirket veritabanı → `Application/Features/CompanyFeatures/<Feature>/<Action>/`
 
-Her aksiyon klasöründe üç dosya bulunur:
+**Entity `BaseEntity`'den türüyorsa** (çoğu durum budur), `OnlineAccountingApp.Framework`'teki base
+sınıfları kullanın — örnek için `CompanyFeature/Create` veya
+`UniformChartOfAccountFeature/Create` klasörlerine bakın:
 
 ```
 Create/
-├── CreateXCommand.cs           # IRequest<TResponse>
-├── CreateXCommandHandler.cs    # IRequestHandler<CreateXCommand, TResponse>
-└── CreateXCommandValidator.cs  # AbstractValidator<CreateXCommand>
+├── CreateXCommand.cs           # : BaseCreateCommand<TResponse>
+├── CreateXCommandHandler.cs    # : BaseCreateCommandHandler<CreateXCommand, TEntity, TResponse>
+└── CreateXCommandValidator.cs  # : BaseCreateCommandValidator<CreateXCommand>
 ```
+
+Update/Delete/GetById/GetList için sırasıyla `Base{Update,Delete,GetById,GetList}Command/Query`,
+`...Handler`, `...Validator` ailesini kullanın (bkz.
+[`OnlineAccountingApp.Framework`](#onlineaccountingappframework)).
+Handler'da yalnızca ihtiyacınız olan `virtual` metotları override edin — `Handle()` akışının
+kendisine dokunmanız gerekmez. Şirket veritabanıyla çalışan handler'lar constructor'da
+`ICompanyUnitOfWork` alıp base sınıfa geçirmelidir (`IUnitOfWork` değil); aksi halde
+`Repository<T>()` yanlışlıkla master veritabanına bağlanır.
+
+**Entity `BaseEntity`'den türemiyorsa** (örn. `AppRole`, ASP.NET Identity'den geliyor), base
+sınıflar uygun değildir — `RoleFeature`'daki gibi doğrudan `IRequest<TResponse>` /
+`IRequestHandler<TCommand, TResponse>` / `AbstractValidator<TCommand>` kullanmaya devam edin.
 
 Handler'lar MediatR tarafından otomatik bulunur (`RegisterServicesFromAssembly`), validator'lar da
 `AddValidatorsFromAssembly` ile kaydedilir ve `ValidationBehavior` üzerinden çalışır. Geriye kalan
@@ -420,21 +464,20 @@ adımlar:
 
 1. Mapster eşlemelerini `Application/Mapper/MapsterConfig.cs` içine ekleyin ve `AddApplication()`
    içinden çağrılan bir `Register...Mappings()` metoduna bağlayın.
-2. Servis arayüzünü/gerçeklemesini `ApplicationDependencyInjection` içinde kaydedin.
-3. Şirket veritabanıyla çalışıyorsa: `ICompanyUnitOfWork` enjekte edin (`IUnitOfWork` değil) ve
-   controller'ı `[RequiresCompanyHeader]` ile işaretleyin.
+2. Entity'ye özgü ek sorgular gerekiyorsa servis arayüzünü/gerçeklemesini
+   `ApplicationDependencyInjection` içinde kaydedin (base sınıflar için bu adım gerekli değildir).
+3. Şirket veritabanıyla çalışıyorsa controller'ı `[RequiresCompanyHeader]` ile işaretleyin.
 4. Controller'lar `BaseApiController`'dan türediği için otomatik olarak `[Authorize]` olur;
    anonim erişim gerekiyorsa `[AllowAnonymous]` ekleyin (`AuthController` gibi).
-
-Ortak veri erişimi için hazır altyapıyı kullanın: `Repository<TEntity, TContext>` sınıfı
-oluşturma, güncelleme, soft delete, sayfalama (`GetPagedAsync`), varlık kontrolü ve sayım
-metotlarını zaten sağlar.
 
 ## Yol Haritası
 
 - [x] JWT kimlik doğrulama — register / login / refresh token, tüm uçlar `[Authorize]`
 - [x] `X-Company-Id` başlığının `UserCompany` üzerinden doğrulanması (kiracılar arası erişim
       kapatıldı)
+- [x] `OnlineAccountingApp.Framework` — Create/Update/Delete/GetById/GetList için jenerik,
+      şablon-metot tabanlı MediatR base sınıfları (`Company`, `UniformChartOfAccount` bu altyapıyı
+      kullanır)
 - [ ] **Kullanıcıyı şirkete atama uç noktaları** — şu an `UserCompany` kayıtları elle
       ekleniyor (yukarıdaki nota bakın)
 - [ ] Rol yönetimi ve başlangıç seed'i (Admin/User)
@@ -620,11 +663,15 @@ OnlineAccountingApp/
 │   ├── CompanyEntities/                 # Company DB: UniformChartOfAccount
 │   └── Exceptions/                      # BusinessException, ValidationException, AppErrorCodes
 │
-├── OnlineAccountingApp.Application/     # Use cases (depends on Domain only)
+├── OnlineAccountingApp.Framework/       # General-purpose MediatR plumbing (depends on Domain only)
+│   ├── Services/                        # IRepository, IUnitOfWork, PagedResult
+│   └── MedatR/Create|Update|Delete|GetById|GetList/
+│                                         # BaseXCommand/Query, BaseXCommandHandler, BaseXCommandValidator
+│
+├── OnlineAccountingApp.Application/     # Use cases (depends on Domain + Framework)
 │   ├── Features/AppFeatures/            # Master DB features (CQRS)
 │   ├── Features/CompanyFeatures/        # Company DB features (CQRS)
-│   ├── Services/                        # IRepository, IUnitOfWork, PagedResult
-│   ├── Services/AppServices/            # ICompanyService
+│   ├── Services/AppServices/            # ICompanyService, IRoleService, IRefreshTokenService, ...
 │   ├── Services/CompanyServices/        # ICompanyContext, ICompanyUnitOfWork, IUniformChartOfAccountService
 │   ├── Behaviors/ValidationBehavior.cs  # MediatR pipeline validation
 │   └── Mapper/MapsterConfig.cs
@@ -663,6 +710,31 @@ public async Task<IActionResult> CreateCompany([FromBody] CreateCompanyCommand c
     return Ok(result);
 }
 ```
+
+### `OnlineAccountingApp.Framework`
+
+An independent layer sitting just above `Domain` and below `Application`. It provides two things:
+
+- `Services/IRepository<T>`, `IUnitOfWork`, `PagedResult<T>` — generic data-access abstractions.
+- `MedatR/Create|Update|Delete|GetById|GetList/` — template-method base classes for each action:
+  a base command/query, handler, and validator per action (`BaseCreateCommand<TResponse>`,
+  `BaseCreateCommandHandler<TCommand, TEntity, TResponse>`, `BaseCreateCommandValidator<TCommand>`,
+  and the equivalent trio for the other four actions). Each handler's `Handle()` flow is fixed;
+  customization happens through `virtual` methods:
+
+  | Method | Purpose |
+  | --- | --- |
+  | `GetExistsPredicate` (Create) / `GetConflictPredicate` (Update) | Uniqueness check |
+  | `BuildPredicate`, `GetIncludes` (GetById / GetList) | Query filter, eager-loading |
+  | `Before/AfterCreateAsync`, `Before/AfterUpdateAsync`, `Before/AfterDeleteAsync` | Extra logic before/after persistence |
+  | `GetNotFoundErrorCode/Message`, `GetAlreadyExistsErrorCode/Message`, `GetConflictErrorCode/Message` | Entity-specific `AppErrorCodes` and message |
+
+  The `Company` and `UniformChartOfAccount` features are built on this plumbing (see
+  `CreateCompanyCommandHandler`, `CreateUniformChartOfAccountCommandHandler`).
+
+> **Note:** `AppRole` derives from ASP.NET Identity's `IdentityRole<string>`, not `BaseEntity`, and
+> `IRoleService` does not implement `IRepository<T>`. `RoleFeature` therefore doesn't fit these base
+> classes and keeps using `IRequest<T>` / `IRequestHandler<,>` / `AbstractValidator<T>` directly.
 
 ## Multi-Tenancy Model
 
@@ -851,14 +923,28 @@ Features are split by which database they target:
 - Master database → `Application/Features/AppFeatures/<Feature>/<Action>/`
 - Company database → `Application/Features/CompanyFeatures/<Feature>/<Action>/`
 
-Each action folder holds three files:
+**If the entity derives from `BaseEntity`** (the common case), use the base classes in
+`OnlineAccountingApp.Framework` — see `CompanyFeature/Create` or
+`UniformChartOfAccountFeature/Create` for a worked example:
 
 ```
 Create/
-├── CreateXCommand.cs           # IRequest<TResponse>
-├── CreateXCommandHandler.cs    # IRequestHandler<CreateXCommand, TResponse>
-└── CreateXCommandValidator.cs  # AbstractValidator<CreateXCommand>
+├── CreateXCommand.cs           # : BaseCreateCommand<TResponse>
+├── CreateXCommandHandler.cs    # : BaseCreateCommandHandler<CreateXCommand, TEntity, TResponse>
+└── CreateXCommandValidator.cs  # : BaseCreateCommandValidator<CreateXCommand>
 ```
+
+Use the matching `Base{Update,Delete,GetById,GetList}Command/Query`, `...Handler`, `...Validator`
+family for the other actions (see [`OnlineAccountingApp.Framework`](#onlineaccountingappframework)).
+Only override the `virtual` methods you actually need — the `Handle()` flow itself never changes.
+Handlers that target a company database must take `ICompanyUnitOfWork` in the constructor (not
+`IUnitOfWork`) and pass it to the base class; otherwise `Repository<T>()` would wrongly resolve
+against the master database.
+
+**If the entity does not derive from `BaseEntity`** (e.g. `AppRole`, which comes from ASP.NET
+Identity), the base classes don't apply — keep using `IRequest<TResponse>` /
+`IRequestHandler<TCommand, TResponse>` / `AbstractValidator<TCommand>` directly, as `RoleFeature`
+does.
 
 Handlers are discovered automatically by MediatR (`RegisterServicesFromAssembly`), and validators
 are registered via `AddValidatorsFromAssembly` and run through `ValidationBehavior`. The remaining
@@ -866,19 +952,19 @@ steps:
 
 1. Add Mapster mappings to `Application/Mapper/MapsterConfig.cs` and hook them into a
    `Register...Mappings()` method called from `AddApplication()`.
-2. Register the service interface and implementation in `ApplicationDependencyInjection`.
-3. If it targets a company database: inject `ICompanyUnitOfWork` (not `IUnitOfWork`) and mark the
-   controller `[RequiresCompanyHeader]`.
+2. If the entity needs extra queries beyond the generic repository, register a service
+   interface/implementation in `ApplicationDependencyInjection` (not needed when the base classes
+   are enough on their own).
+3. If it targets a company database, mark the controller `[RequiresCompanyHeader]`.
 4. Controllers inherit `[Authorize]` from `BaseApiController`; add `[AllowAnonymous]` if anonymous
    access is needed (as `AuthController` does).
-
-Use the existing data-access plumbing: `Repository<TEntity, TContext>` already provides create,
-update, soft delete, paging (`GetPagedAsync`), existence checks, and counting.
 
 ## Roadmap
 
 - [x] JWT authentication — register / login / refresh token, every endpoint `[Authorize]`
 - [x] Validate the `X-Company-Id` header against `UserCompany` (cross-tenant access closed)
+- [x] `OnlineAccountingApp.Framework` — generic, template-method MediatR base classes for
+      Create/Update/Delete/GetById/GetList (`Company` and `UniformChartOfAccount` are built on it)
 - [ ] **Assign-user-to-company endpoints** — `UserCompany` rows are currently inserted by hand
       (see the note above)
 - [ ] Role management and initial seeding (Admin/User)
