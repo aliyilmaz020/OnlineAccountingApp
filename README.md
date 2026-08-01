@@ -21,9 +21,10 @@ API'si. Clean Architecture katmanlaması, MediatR ile CQRS ve EF Core üzerine k
 5. [Mimari](#mimari)
 6. [Çok Kiracılılık Modeli](#çok-kiracılılık-modeli)
 7. [API Referansı](#api-referansı)
-8. [Yanıt Zarfı ve Hata Kodları](#yanıt-zarfı-ve-hata-kodları)
-9. [Yeni Feature Ekleme](#yeni-feature-ekleme)
-10. [Yol Haritası](#yol-haritası)
+8. [gRPC Servisi](#grpc-servisi)
+9. [Yanıt Zarfı ve Hata Kodları](#yanıt-zarfı-ve-hata-kodları)
+10. [Yeni Feature Ekleme](#yeni-feature-ekleme)
+11. [Yol Haritası](#yol-haritası)
 
 ## Genel Bakış
 
@@ -201,7 +202,13 @@ OnlineAccountingApp/
 │   ├── Options/JwtOptions.cs            # "Jwt" yapılandırma bölümü
 │   └── Services/JwtTokenService.cs      # ITokenService — token üretimi
 │
-└── OnlineAccountingApp.WebApi/          # Sunum katmanı
+├── OnlineAccountingApp.Grpc/            # İkinci sunum katmanı: gRPC host'u
+│   ├── Protos/                          # auth, companies, roles, uniform_chart_of_accounts
+│   ├── Services/                        # *GrpcService — aynı MediatR komut/sorgularını dispatch eder
+│   ├── Interceptors/                    # BusinessExceptionInterceptor
+│   └── DependencyInjections/            # WebApi'nin DI kaydının elle senkronize edilen kopyası
+│
+└── OnlineAccountingApp.WebApi/          # REST sunum katmanı
     ├── Controllers/                     # İnce MediatR dispatcher'ları
     ├── Tenancy/                         # HttpCompanyContext, RequiresCompanyHeaderAttribute
     ├── DependencyInjections/            # AddApplication(), AddPersistence()
@@ -368,6 +375,54 @@ Tüm uç noktalar token'a ek olarak `X-Company-Id` başlığını **zorunlu** k�
 
 Silinen (soft delete) kayıtlar listelerde ve tekil sorgularda dönmez.
 
+## gRPC Servisi
+
+REST API'nin yanında, aynı Application/Persistence/Infrastructure katmanlarını kullanan ayrı bir
+`OnlineAccountingApp.Grpc` host'u vardır. Kendi `Program.cs`'i, kendi portları ve kendi DI
+kayıtlarıyla (`DependencyInjections/Grpc*DependencyInjection.cs`) çalışır — bunlar WebApi'nin
+`AddPersistence`/`AddConfigureAuthentication`/`AddInfrastructure`/`AddApplication` metodlarının elle
+senkronize edilen birebir kopyalarıdır; WebApi projesine referans vermez.
+
+| Adres | Açıklama |
+| --- | --- |
+| `http://localhost:5158` | HTTP/2 (gRPC) |
+| `https://localhost:7293` | HTTPS/2 (gRPC) |
+
+Development ortamında gRPC reflection açıktır (`grpcurl`, Postman gibi istemcilerle keşif için).
+
+### Servisler
+
+Her gRPC servisi, ilgili REST controller'ıyla aynı MediatR command/query'lerini dispatch eder —
+iş mantığı Application katmanında tek yerde yazılır, iki protokol de aynı handler'lara gider.
+
+| Servis | `.proto` | REST karşılığı |
+| --- | --- | --- |
+| `Auth` | `Protos/auth.proto` | `AuthController` (Login/Register/RefreshToken, anonim) |
+| `Companies` | `Protos/companies.proto` | `CompaniesController` |
+| `Roles` | `Protos/roles.proto` | `RolesController` |
+| `UniformChartOfAccounts` | `Protos/uniform_chart_of_accounts.proto` | `UniformChartOfAccountsController` |
+
+`Auth` dışındaki tüm servisler `[Authorize]`'dır; kimlik doğrulama ve çok kiracılılık
+(`X-Company-Id`) aynı şekilde işler, yalnızca HTTP başlığı yerine **gRPC metadata** üzerinden taşınır.
+
+### Hata işleme
+
+REST tarafındaki `GlobalExceptionHandler` / `ApiResponse` yerine `BusinessExceptionInterceptor`
+kullanılır: `BusinessException` / `ValidationException` yakalanıp uygun `StatusCode`'a sahip bir
+`RpcException`'a çevrilir. gRPC'nin JSON gövdesi olmadığından `AppErrorCode` (ve doğrulama
+hatalarında alan bazlı hatalar) **trailing metadata**'da taşınır: `error-code`, doğrulama
+hatalarında ayrıca `errors-json`.
+
+| HTTP durumu (`AppErrorCodes`) | gRPC `StatusCode` |
+| --- | --- |
+| 400 | `InvalidArgument` |
+| 401 | `Unauthenticated` |
+| 403 | `PermissionDenied` |
+| 404 | `NotFound` |
+| 409 | `AlreadyExists` |
+| `03400` (`Tenant.CompanyNotSpecified`) | `FailedPrecondition` (özel durum) |
+| Beklenmeyen hata | `Internal` |
+
 ## Yanıt Zarfı ve Hata Kodları
 
 Tüm yanıtlar `ApiResponse` ile sarılır.
@@ -511,9 +566,10 @@ Architecture layering, CQRS via MediatR, and EF Core.
 5. [Architecture](#architecture)
 6. [Multi-Tenancy Model](#multi-tenancy-model)
 7. [API Reference](#api-reference)
-8. [Response Envelope and Error Codes](#response-envelope-and-error-codes)
-9. [Adding a Feature](#adding-a-feature)
-10. [Roadmap](#roadmap)
+8. [gRPC Service](#grpc-service)
+9. [Response Envelope and Error Codes](#response-envelope-and-error-codes)
+10. [Adding a Feature](#adding-a-feature)
+11. [Roadmap](#roadmap)
 
 ## Overview
 
@@ -690,7 +746,13 @@ OnlineAccountingApp/
 │   ├── Options/JwtOptions.cs            # the "Jwt" configuration section
 │   └── Services/JwtTokenService.cs      # ITokenService — token issuing
 │
-└── OnlineAccountingApp.WebApi/          # Presentation layer
+├── OnlineAccountingApp.Grpc/            # Second presentation layer: the gRPC host
+│   ├── Protos/                          # auth, companies, roles, uniform_chart_of_accounts
+│   ├── Services/                        # *GrpcService — dispatch the same MediatR commands/queries
+│   ├── Interceptors/                    # BusinessExceptionInterceptor
+│   └── DependencyInjections/            # hand-synced copy of WebApi's DI registration
+│
+└── OnlineAccountingApp.WebApi/          # REST presentation layer
     ├── Controllers/                     # Thin MediatR dispatchers
     ├── Tenancy/                         # HttpCompanyContext, RequiresCompanyHeaderAttribute
     ├── DependencyInjections/            # AddApplication(), AddPersistence()
@@ -854,6 +916,54 @@ user's membership of that company.
 | `searchTerm` | — | Matches `Name` for companies; `Code` or `Name` for chart of accounts |
 
 Soft-deleted records are excluded from both list and single-record queries.
+
+## gRPC Service
+
+Alongside the REST API there's a separate `OnlineAccountingApp.Grpc` host that uses the same
+Application/Persistence/Infrastructure layers. It has its own `Program.cs`, its own ports, and its
+own DI registrations (`DependencyInjections/Grpc*DependencyInjection.cs`) — hand-synced copies of
+WebApi's `AddPersistence`/`AddConfigureAuthentication`/`AddInfrastructure`/`AddApplication`; it does
+not reference the WebApi project.
+
+| Address | Description |
+| --- | --- |
+| `http://localhost:5158` | HTTP/2 (gRPC) |
+| `https://localhost:7293` | HTTPS/2 (gRPC) |
+
+gRPC reflection is enabled in Development (for discovery with tools like `grpcurl` or Postman).
+
+### Services
+
+Each gRPC service dispatches the same MediatR commands/queries as its REST controller counterpart
+— business logic is written once in the Application layer and both protocols hit the same handlers.
+
+| Service | `.proto` | REST equivalent |
+| --- | --- | --- |
+| `Auth` | `Protos/auth.proto` | `AuthController` (Login/Register/RefreshToken, anonymous) |
+| `Companies` | `Protos/companies.proto` | `CompaniesController` |
+| `Roles` | `Protos/roles.proto` | `RolesController` |
+| `UniformChartOfAccounts` | `Protos/uniform_chart_of_accounts.proto` | `UniformChartOfAccountsController` |
+
+Every service except `Auth` is `[Authorize]`. Authentication and multi-tenancy (`X-Company-Id`)
+work the same way, just carried through **gRPC metadata** instead of an HTTP header.
+
+### Error handling
+
+Instead of REST's `GlobalExceptionHandler` / `ApiResponse`, a `BusinessExceptionInterceptor` catches
+`BusinessException` / `ValidationException` and turns them into an `RpcException` with a matching
+`StatusCode`. Since gRPC has no JSON response body, `AppErrorCode` (and, for validation failures,
+the per-field errors) travel as **trailing metadata**: `error-code`, plus `errors-json` for
+validation errors.
+
+| HTTP status (`AppErrorCodes`) | gRPC `StatusCode` |
+| --- | --- |
+| 400 | `InvalidArgument` |
+| 401 | `Unauthenticated` |
+| 403 | `PermissionDenied` |
+| 404 | `NotFound` |
+| 409 | `AlreadyExists` |
+| `03400` (`Tenant.CompanyNotSpecified`) | `FailedPrecondition` (special case) |
+| Unexpected error | `Internal` |
 
 ## Response Envelope and Error Codes
 
