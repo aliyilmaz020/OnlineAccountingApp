@@ -91,7 +91,10 @@ public class UpdateCompanyCommandHandlerTests
 
         repository.Setup(r => r.GetByIdAsync("company-1", It.IsAny<CancellationToken>()))
             .ReturnsAsync(ExistingCompany());
+
+        Expression<Func<Company, bool>>? capturedPredicate = null;
         repository.Setup(r => r.ExistsAsync(It.IsAny<Expression<Func<Company, bool>>>(), It.IsAny<CancellationToken>()))
+            .Callback<Expression<Func<Company, bool>>, CancellationToken>((predicate, _) => capturedPredicate = predicate)
             .ReturnsAsync(true);
 
         UpdateCompanyCommandHandler handler = new(unitOfWork.Object);
@@ -102,5 +105,11 @@ public class UpdateCompanyCommandHandlerTests
 
         Assert.Equal(AppErrorCodes.Company.AlreadyExists, exception.ErrorCode);
         repository.Verify(r => r.UpdateAsync(It.IsAny<Company>(), It.IsAny<CancellationToken>()), Times.Never);
+
+        Assert.NotNull(capturedPredicate);
+        Func<Company, bool> compiledPredicate = capturedPredicate!.Compile();
+        Assert.True(compiledPredicate(new Company { Id = "company-2", Name = command.Name }));
+        Assert.False(compiledPredicate(new Company { Id = "company-1", Name = command.Name }));
+        Assert.False(compiledPredicate(new Company { Id = "company-2", Name = "A Completely Different Name" }));
     }
 }

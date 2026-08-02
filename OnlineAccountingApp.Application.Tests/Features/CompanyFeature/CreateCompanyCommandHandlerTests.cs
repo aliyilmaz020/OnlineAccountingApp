@@ -5,6 +5,7 @@ using OnlineAccountingApp.Application.Tests.TestHelpers;
 using OnlineAccountingApp.Domain.Entities;
 using OnlineAccountingApp.Domain.Exceptions;
 using OnlineAccountingApp.Framework.Services;
+using System.Linq.Expressions;
 
 namespace OnlineAccountingApp.Application.Tests.Features.CompanyFeature;
 
@@ -57,7 +58,9 @@ public class CreateCompanyCommandHandlerTests
     {
         (Mock<IUnitOfWork> unitOfWork, Mock<IRepository<Company>> repository) = UnitOfWorkMockFactory.Create<Company>();
 
-        repository.Setup(r => r.ExistsAsync(It.IsAny<System.Linq.Expressions.Expression<Func<Company, bool>>>(), It.IsAny<CancellationToken>()))
+        Expression<Func<Company, bool>>? capturedPredicate = null;
+        repository.Setup(r => r.ExistsAsync(It.IsAny<Expression<Func<Company, bool>>>(), It.IsAny<CancellationToken>()))
+            .Callback<Expression<Func<Company, bool>>, CancellationToken>((predicate, _) => capturedPredicate = predicate)
             .ReturnsAsync(true);
 
         CreateCompanyCommandHandler handler = new(unitOfWork.Object);
@@ -68,5 +71,10 @@ public class CreateCompanyCommandHandlerTests
 
         Assert.Equal(AppErrorCodes.Company.AlreadyExists, exception.ErrorCode);
         repository.Verify(r => r.CreateAsync(It.IsAny<Company>(), It.IsAny<CancellationToken>()), Times.Never);
+
+        Assert.NotNull(capturedPredicate);
+        Func<Company, bool> compiledPredicate = capturedPredicate!.Compile();
+        Assert.True(compiledPredicate(new Company { Name = command.Name }));
+        Assert.False(compiledPredicate(new Company { Name = "A Completely Different Name" }));
     }
 }

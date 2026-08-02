@@ -31,11 +31,14 @@ public class GetCompanyByIdQueryHandlerTests
     {
         (Mock<IUnitOfWork> unitOfWork, Mock<IRepository<Company>> repository) = UnitOfWorkMockFactory.Create<Company>();
 
+        Expression<Func<Company, bool>>? capturedPredicate = null;
         repository.Setup(r => r.GetAsync(
                 It.IsAny<Expression<Func<Company, bool>>>(),
                 It.IsAny<Expression<Func<Company, object>>[]?>(),
                 It.IsAny<bool>(),
                 It.IsAny<CancellationToken>()))
+            .Callback<Expression<Func<Company, bool>>, Expression<Func<Company, object>>[]?, bool, CancellationToken>(
+                (predicate, _, _, _) => capturedPredicate = predicate)
             .ReturnsAsync(ExistingCompany());
 
         GetCompanyByIdQueryHandler handler = new(unitOfWork.Object);
@@ -45,6 +48,11 @@ public class GetCompanyByIdQueryHandlerTests
 
         Assert.Equal("company-1", result.Id);
         Assert.Equal("Acme Corp", result.Name);
+
+        Assert.NotNull(capturedPredicate);
+        Func<Company, bool> compiledPredicate = capturedPredicate!.Compile();
+        Assert.True(compiledPredicate(new Company { Id = "company-1" }));
+        Assert.False(compiledPredicate(new Company { Id = "some-other-id" }));
     }
 
     [Fact]

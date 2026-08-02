@@ -20,11 +20,14 @@ public class GetUniformChartOfAccountByIdQueryHandlerTests
         (Mock<ICompanyUnitOfWork> unitOfWork, Mock<IRepository<UniformChartOfAccount>> repository) =
             UnitOfWorkMockFactory.Create<UniformChartOfAccount, ICompanyUnitOfWork>();
 
+        Expression<Func<UniformChartOfAccount, bool>>? capturedPredicate = null;
         repository.Setup(r => r.GetAsync(
                 It.IsAny<Expression<Func<UniformChartOfAccount, bool>>>(),
                 It.IsAny<Expression<Func<UniformChartOfAccount, object>>[]?>(),
                 It.IsAny<bool>(),
                 It.IsAny<CancellationToken>()))
+            .Callback<Expression<Func<UniformChartOfAccount, bool>>, Expression<Func<UniformChartOfAccount, object>>[]?, bool, CancellationToken>(
+                (predicate, _, _, _) => capturedPredicate = predicate)
             .ReturnsAsync(ExistingAccount());
 
         GetUniformChartOfAccountByIdQueryHandler handler = new(unitOfWork.Object);
@@ -35,6 +38,12 @@ public class GetUniformChartOfAccountByIdQueryHandlerTests
         Assert.Equal("account-1", result.Id);
         Assert.Equal("100", result.Code);
         Assert.Equal("Cash", result.Name);
+
+        Assert.NotNull(capturedPredicate);
+        Func<UniformChartOfAccount, bool> compiledPredicate = capturedPredicate!.Compile();
+        Assert.True(compiledPredicate(new UniformChartOfAccount { Id = "account-1", Deleted = false }));
+        Assert.False(compiledPredicate(new UniformChartOfAccount { Id = "some-other-id", Deleted = false }));
+        Assert.False(compiledPredicate(new UniformChartOfAccount { Id = "account-1", Deleted = true }));
     }
 
     [Fact]
