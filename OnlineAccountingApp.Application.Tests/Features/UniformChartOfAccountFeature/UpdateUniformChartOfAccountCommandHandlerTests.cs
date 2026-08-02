@@ -66,7 +66,10 @@ public class UpdateUniformChartOfAccountCommandHandlerTests
             UnitOfWorkMockFactory.Create<UniformChartOfAccount, ICompanyUnitOfWork>();
 
         repository.Setup(r => r.GetByIdAsync("account-1", It.IsAny<CancellationToken>())).ReturnsAsync(ExistingAccount());
+
+        Expression<Func<UniformChartOfAccount, bool>>? capturedPredicate = null;
         repository.Setup(r => r.ExistsAsync(It.IsAny<Expression<Func<UniformChartOfAccount, bool>>>(), It.IsAny<CancellationToken>()))
+            .Callback<Expression<Func<UniformChartOfAccount, bool>>, CancellationToken>((predicate, _) => capturedPredicate = predicate)
             .ReturnsAsync(true);
 
         UpdateUniformChartOfAccountCommandHandler handler = new(unitOfWork.Object);
@@ -77,5 +80,12 @@ public class UpdateUniformChartOfAccountCommandHandlerTests
 
         Assert.Equal(AppErrorCodes.UniformChartOfAccount.AlreadyExists, exception.ErrorCode);
         repository.Verify(r => r.UpdateAsync(It.IsAny<UniformChartOfAccount>(), It.IsAny<CancellationToken>()), Times.Never);
+
+        Assert.NotNull(capturedPredicate);
+        Func<UniformChartOfAccount, bool> compiledPredicate = capturedPredicate!.Compile();
+        Assert.True(compiledPredicate(new UniformChartOfAccount { Id = "account-2", Code = command.Code, Deleted = false }));
+        Assert.False(compiledPredicate(new UniformChartOfAccount { Id = "account-1", Code = command.Code, Deleted = false }));
+        Assert.False(compiledPredicate(new UniformChartOfAccount { Id = "account-2", Code = "DIFFERENT-CODE", Deleted = false }));
+        Assert.False(compiledPredicate(new UniformChartOfAccount { Id = "account-2", Code = command.Code, Deleted = true }));
     }
 }
