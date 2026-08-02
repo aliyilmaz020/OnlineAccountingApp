@@ -1,4 +1,5 @@
 ﻿using OnlineAccountingApp.Domain.Abstracts;
+using OnlineAccountingApp.Domain.AppEntities;
 using OnlineAccountingApp.Domain.Entities.Identity;
 using System.ComponentModel.DataAnnotations.Schema;
 

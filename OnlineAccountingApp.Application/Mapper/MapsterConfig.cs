@@ -6,8 +6,8 @@ using OnlineAccountingApp.Application.Features.AppFeatures.RoleFeature.Update;
 using OnlineAccountingApp.Application.Features.CompanyFeatures.UniformChartOfAccountFeature.Create;
 using OnlineAccountingApp.Application.Features.CompanyFeatures.UniformChartOfAccountFeature.GetList;
 using OnlineAccountingApp.Application.Features.CompanyFeatures.UniformChartOfAccountFeature.Update;
+using OnlineAccountingApp.Domain.AppEntities;
 using OnlineAccountingApp.Domain.CompanyEntities;
-using OnlineAccountingApp.Domain.Entities;
 using OnlineAccountingApp.Domain.Entities.Identity;
 
 namespace OnlineAccountingApp.Application.Mapper;

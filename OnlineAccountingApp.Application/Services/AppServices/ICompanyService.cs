@@ -1,4 +1,4 @@
-﻿using OnlineAccountingApp.Domain.Entities;
+﻿using OnlineAccountingApp.Domain.AppEntities;
 using OnlineAccountingApp.Framework.Services;
 
 namespace OnlineAccountingApp.Application.Services.AppServices;

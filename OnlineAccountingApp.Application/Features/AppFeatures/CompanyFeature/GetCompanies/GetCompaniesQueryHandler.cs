@@ -1,4 +1,4 @@
-using OnlineAccountingApp.Domain.Entities;
+using OnlineAccountingApp.Domain.AppEntities;
 using OnlineAccountingApp.Framework.MedatR.GetList;
 using OnlineAccountingApp.Framework.Services;
 using System.Linq.Expressions;

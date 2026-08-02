@@ -1,6 +1,6 @@
 ﻿using OnlineAccountingApp.Domain.Abstracts;
 
-namespace OnlineAccountingApp.Domain.Entities;
+namespace OnlineAccountingApp.Domain.AppEntities;
 
 public sealed class Company : BaseEntity
 {

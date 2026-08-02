@@ -2,7 +2,7 @@ using Moq;
 using OnlineAccountingApp.Application.Features.AppFeatures.CompanyFeature.GetCompanies;
 using OnlineAccountingApp.Application.Features.AppFeatures.CompanyFeature.GetCompanyById;
 using OnlineAccountingApp.Application.Tests.TestHelpers;
-using OnlineAccountingApp.Domain.Entities;
+using OnlineAccountingApp.Domain.AppEntities;
 using OnlineAccountingApp.Domain.Exceptions;
 using OnlineAccountingApp.Framework.Services;
 using System.Linq.Expressions;

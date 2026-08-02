@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OnlineAccountingApp.Application.Services.AppServices;
-using OnlineAccountingApp.Domain.Entities;
+using OnlineAccountingApp.Domain.AppEntities;
 using OnlineAccountingApp.Persistence.Context;
 
 namespace OnlineAccountingApp.Persistence.Services.AppServices;

@@ -1,5 +1,5 @@
 using OnlineAccountingApp.Application.Features.AppFeatures.CompanyFeature.GetCompanies;
-using OnlineAccountingApp.Domain.Entities;
+using OnlineAccountingApp.Domain.AppEntities;
 using OnlineAccountingApp.Domain.Exceptions;
 using OnlineAccountingApp.Framework.MedatR.Update;
 using OnlineAccountingApp.Framework.Services;

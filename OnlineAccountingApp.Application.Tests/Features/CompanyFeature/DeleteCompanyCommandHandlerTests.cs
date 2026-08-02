@@ -1,7 +1,7 @@
 using Moq;
 using OnlineAccountingApp.Application.Features.AppFeatures.CompanyFeature.Delete;
 using OnlineAccountingApp.Application.Tests.TestHelpers;
-using OnlineAccountingApp.Domain.Entities;
+using OnlineAccountingApp.Domain.AppEntities;
 using OnlineAccountingApp.Domain.Exceptions;
 using OnlineAccountingApp.Framework.Services;
 

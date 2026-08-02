@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using OnlineAccountingApp.Domain.Abstracts;
+using OnlineAccountingApp.Domain.AppEntities;
 using OnlineAccountingApp.Domain.Entities;
 using OnlineAccountingApp.Domain.Entities.Identity;
 
