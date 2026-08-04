@@ -57,4 +57,31 @@ public static class AppErrorCodes
         public const string AlreadyExists = ServiceCode + "409";
         public const string ValidationFailed = ServiceCode + "400";
     }
+
+    public static class MainRole
+    {
+        private const string ServiceCode = "06";
+
+        public const string NotFound = ServiceCode + "404";
+        public const string AlreadyExists = ServiceCode + "409";
+        public const string ValidationFailed = ServiceCode + "400";
+    }
+
+    public static class MainRoleAndRoleRelationship
+    {
+        private const string ServiceCode = "07";
+
+        public const string NotFound = ServiceCode + "404";
+        public const string AlreadyExists = ServiceCode + "409";
+        public const string ValidationFailed = ServiceCode + "400";
+    }
+
+    public static class MainRoleAndUserRelationship
+    {
+        private const string ServiceCode = "08";
+
+        public const string NotFound = ServiceCode + "404";
+        public const string AlreadyExists = ServiceCode + "409";
+        public const string ValidationFailed = ServiceCode + "400";
+    }
 }

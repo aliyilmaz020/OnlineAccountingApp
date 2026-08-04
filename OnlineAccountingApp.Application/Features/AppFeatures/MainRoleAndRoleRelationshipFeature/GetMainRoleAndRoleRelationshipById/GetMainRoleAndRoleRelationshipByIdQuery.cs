@@ -1,0 +1,8 @@
+using OnlineAccountingApp.Application.Features.AppFeatures.MainRoleAndRoleRelationshipFeature.GetMainRoleAndRoleRelationships;
+using OnlineAccountingApp.Framework.MedatR.GetById;
+
+namespace OnlineAccountingApp.Application.Features.AppFeatures.MainRoleAndRoleRelationshipFeature.GetMainRoleAndRoleRelationshipById;
+
+public sealed class GetMainRoleAndRoleRelationshipByIdQuery : BaseGetByIdQuery<MainRoleAndRoleRelationshipListItemDto>
+{
+}

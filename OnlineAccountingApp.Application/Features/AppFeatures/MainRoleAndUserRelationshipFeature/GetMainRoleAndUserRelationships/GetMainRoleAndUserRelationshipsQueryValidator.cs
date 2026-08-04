@@ -1,0 +1,7 @@
+using OnlineAccountingApp.Framework.MedatR.GetList;
+
+namespace OnlineAccountingApp.Application.Features.AppFeatures.MainRoleAndUserRelationshipFeature.GetMainRoleAndUserRelationships;
+
+public sealed class GetMainRoleAndUserRelationshipsQueryValidator : BaseGetListQueryValidator<GetMainRoleAndUserRelationshipsQuery>
+{
+}

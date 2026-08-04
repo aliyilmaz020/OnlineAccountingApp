@@ -15,6 +15,9 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : Ident
     public DbSet<Company> Companies { get; set; }
     public DbSet<UserCompany> UserCompanies { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<MainRole> MainRoles { get; set; }
+    public DbSet<MainRoleAndRoleRelationship> MainRoleAndRoleRelationships { get; set; }
+    public DbSet<MainRoleAndUserRelationship> MainRoleAndUserRelationships { get; set; }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -45,6 +48,12 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : Ident
         builder.Ignore<IdentityUserClaim<string>>();
         builder.Ignore<IdentityUserToken<string>>();
         builder.Ignore<IdentityRoleClaim<string>>();
+
+        builder.Entity<MainRoleAndUserRelationship>()
+            .HasOne(r => r.Company)
+            .WithMany()
+            .HasForeignKey(r => r.CompanyId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 
     public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>

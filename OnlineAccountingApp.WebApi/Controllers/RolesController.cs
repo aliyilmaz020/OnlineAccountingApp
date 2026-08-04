@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using OnlineAccountingApp.Application.Features.AppFeatures.RoleFeature.AssignRoleToUser;
 using OnlineAccountingApp.Application.Features.AppFeatures.RoleFeature.Create;
+using OnlineAccountingApp.Application.Features.AppFeatures.RoleFeature.CreateAllRoles;
 using OnlineAccountingApp.Application.Features.AppFeatures.RoleFeature.Delete;
 using OnlineAccountingApp.Application.Features.AppFeatures.RoleFeature.GetRoleById;
 using OnlineAccountingApp.Application.Features.AppFeatures.RoleFeature.GetRoles;
@@ -17,6 +18,13 @@ public class RolesController(IMediator mediator) : BaseApiController(mediator)
     public async Task<IActionResult> CreateRole([FromBody] CreateRoleCommand command, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> CreateAllRoles(CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new CreateAllRolesCommand(), cancellationToken);
         return Ok(result);
     }
 
