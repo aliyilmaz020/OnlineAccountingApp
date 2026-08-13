@@ -19,7 +19,7 @@ namespace OnlineAccountingApp.Persistence.Services.AppServices;
 /// </summary>
 public sealed class SeedService(AppDbContext context, UserManager<AppUser> userManager, IRoleService roleService) : ISeedService
 {
-    private const string SamplePassword = "Sample!2024";
+    private const string SamplePassword = "Password1";
 
     public async Task<SeedSampleDataResultDto> SeedSampleDataAsync(CancellationToken cancellationToken = default)
     {
@@ -93,7 +93,7 @@ public sealed class SeedService(AppDbContext context, UserManager<AppUser> userM
                     EmailConfirmed = true,
                     Status = true
                 };
-                ThrowIfFailed(await userManager.CreateAsync(user, SamplePassword));
+                ThrowIfFailed(await userManager.CreateAsync(user, "Test.123"));
                 result.UsersCreated++;
             }
 
