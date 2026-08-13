@@ -352,6 +352,62 @@ Token gerekir; `X-Company-Id` başlığı **gerekmez**.
 | `DELETE` | `/api/Companies/DeleteCompany/{id}` | Şirketi siler (soft delete) |
 | `GET` | `/api/Companies/MigrateCompanyDb` | Tüm şirket veritabanlarına migration uygular |
 
+### Roles — master veritabanı
+
+Token gerekir; `X-Company-Id` başlığı **gerekmez**. `AppRole` ASP.NET Identity'den geldiği için bu
+feature Framework base sınıflarını kullanmaz (bkz. [Mimari](#mimari)).
+
+| Metot | Yol | Açıklama |
+| --- | --- | --- |
+| `POST` | `/api/Roles/CreateRole` | Yeni rol oluşturur (`Name`, `Code`) |
+| `POST` | `/api/Roles/CreateAllRoles` | Tanımlı tüm rolleri toplu olarak oluşturur (başlangıç seed'i) |
+| `GET` | `/api/Roles/GetRoles` | Sayfalı rol listesi |
+| `GET` | `/api/Roles/GetRoleById/{id}` | Tek rol getirir |
+| `PUT` | `/api/Roles/UpdateRole/{id}` | Rolü günceller |
+| `DELETE` | `/api/Roles/DeleteRole/{id}` | Rolü siler (soft delete) |
+| `POST` | `/api/Roles/AssignRoleToUser` | Kullanıcıya rol atar (`UserId`, `RoleCode`) |
+| `DELETE` | `/api/Roles/RemoveRoleFromUser` | Kullanıcıdan rolü kaldırır (`UserId`, `RoleName`) |
+| `GET` | `/api/Roles/GetUserRoles/{userId}` | Kullanıcının sahip olduğu rolleri listeler |
+
+### MainRoles — master veritabanı
+
+Token gerekir; `X-Company-Id` başlığı **gerekmez**. `MainRole` (`Title`, `IsRoleCreateByAdmin`,
+`CompanyId`) `BaseEntity`'den türer ve Framework base sınıflarını kullanır.
+
+| Metot | Yol | Açıklama |
+| --- | --- | --- |
+| `POST` | `/api/MainRoles/CreateMainRole` | Yeni ana rol oluşturur |
+| `GET` | `/api/MainRoles/GetMainRoles` | Sayfalı ana rol listesi |
+| `GET` | `/api/MainRoles/GetMainRoleById/{id}` | Tek ana rol getirir |
+| `PUT` | `/api/MainRoles/UpdateMainRole/{id}` | Ana rolü günceller |
+| `DELETE` | `/api/MainRoles/DeleteMainRole/{id}` | Ana rolü siler (soft delete) |
+
+### MainRoleAndRoleRelationships — master veritabanı
+
+`MainRole` ile `AppRole` arasındaki ilişkiyi (`RoleId`, `MainRoleId`) yönetir. Token gerekir;
+`X-Company-Id` başlığı gerekmez.
+
+| Metot | Yol | Açıklama |
+| --- | --- | --- |
+| `POST` | `/api/MainRoleAndRoleRelationships/CreateMainRoleAndRoleRelationship` | Yeni ilişki kaydı ekler |
+| `GET` | `/api/MainRoleAndRoleRelationships/GetMainRoleAndRoleRelationships` | Sayfalı liste |
+| `GET` | `/api/MainRoleAndRoleRelationships/GetMainRoleAndRoleRelationshipById/{id}` | Tek kayıt getirir |
+| `PUT` | `/api/MainRoleAndRoleRelationships/UpdateMainRoleAndRoleRelationship/{id}` | Kaydı günceller |
+| `DELETE` | `/api/MainRoleAndRoleRelationships/DeleteMainRoleAndRoleRelationship/{id}` | Kaydı siler (soft delete) |
+
+### MainRoleAndUserRelationships — master veritabanı
+
+`MainRole` ile `AppUser` arasındaki ilişkiyi (`UserId`, `MainRoleId`, `CompanyId`) yönetir. Token
+gerekir; `X-Company-Id` başlığı gerekmez.
+
+| Metot | Yol | Açıklama |
+| --- | --- | --- |
+| `POST` | `/api/MainRoleAndUserRelationships/CreateMainRoleAndUserRelationship` | Yeni ilişki kaydı ekler |
+| `GET` | `/api/MainRoleAndUserRelationships/GetMainRoleAndUserRelationships` | Sayfalı liste |
+| `GET` | `/api/MainRoleAndUserRelationships/GetMainRoleAndUserRelationshipById/{id}` | Tek kayıt getirir |
+| `PUT` | `/api/MainRoleAndUserRelationships/UpdateMainRoleAndUserRelationship/{id}` | Kaydı günceller |
+| `DELETE` | `/api/MainRoleAndUserRelationships/DeleteMainRoleAndUserRelationship/{id}` | Kaydı siler (soft delete) |
+
 ### UniformChartOfAccounts — şirket veritabanı
 
 Tüm uç noktalar token'a ek olarak `X-Company-Id` başlığını **zorunlu** kılar ve kullanıcının o
@@ -365,15 +421,16 @@ Tüm uç noktalar token'a ek olarak `X-Company-Id` başlığını **zorunlu** k�
 | `PUT` | `/api/UniformChartOfAccounts/UpdateUniformChartOfAccount/{id}` | Kaydı günceller |
 | `DELETE` | `/api/UniformChartOfAccounts/DeleteUniformChartOfAccount/{id}` | Kaydı siler (soft delete) |
 
-**Sayfalama parametreleri** (her iki listeleme uç noktası için):
+**Sayfalama parametreleri** (listeleme uç noktaları için):
 
 | Parametre | Varsayılan | Kural |
 | --- | --- | --- |
 | `pageNumber` | `1` | `>= 1` |
 | `pageSize` | `20` | `1` – `100` |
-| `searchTerm` | — | Şirketlerde `Name`; hesap planında `Code` veya `Name` içinde arar |
+| `searchTerm` | — | Şirketlerde ve rollerde `Name`; ana rollerde `Title`; hesap planında `Code` veya `Name` içinde arar |
 
-Silinen (soft delete) kayıtlar listelerde ve tekil sorgularda dönmez.
+`GetMainRoleAndRoleRelationships` ve `GetMainRoleAndUserRelationships` sayfalıdır ama `searchTerm`
+desteklemez. Silinen (soft delete) kayıtlar listelerde ve tekil sorgularda dönmez.
 
 ## gRPC Servisi
 
@@ -482,6 +539,18 @@ Kod biçimi: **`{2 haneli servis kodu}{3 haneli HTTP durum kodu}`**. Son üç ha
 | `04401` | 401 | Token yok/geçersiz, hatalı parola veya geçersiz refresh token |
 | `04403` | 403 | Kullanıcının bu şirkete erişim yetkisi yok |
 | `04409` | 409 | Bu e-posta ile kayıtlı kullanıcı zaten var |
+| `05400` | 400 | Rol doğrulama hatası |
+| `05404` | 404 | Rol bulunamadı |
+| `05409` | 409 | Aynı isimde/kodda rol zaten var |
+| `06400` | 400 | Ana rol (MainRole) doğrulama hatası |
+| `06404` | 404 | Ana rol bulunamadı |
+| `06409` | 409 | Aynı başlıkta ana rol zaten var |
+| `07400` | 400 | MainRole-Role ilişkisi doğrulama hatası |
+| `07404` | 404 | MainRole-Role ilişkisi bulunamadı |
+| `07409` | 409 | Aynı MainRole-Role ilişkisi zaten var |
+| `08400` | 400 | MainRole-User ilişkisi doğrulama hatası |
+| `08404` | 404 | MainRole-User ilişkisi bulunamadı |
+| `08409` | 409 | Aynı MainRole-User ilişkisi zaten var |
 
 ## Yeni Feature Ekleme
 
@@ -533,13 +602,18 @@ adımlar:
 - [x] `OnlineAccountingApp.Framework` — Create/Update/Delete/GetById/GetList için jenerik,
       şablon-metot tabanlı MediatR base sınıfları (`Company`, `UniformChartOfAccount` bu altyapıyı
       kullanır)
+- [x] Rol yönetimi — `RolesController` (CRUD, kullanıcıya rol atama/kaldırma) ve `CreateAllRoles`
+      ile toplu başlangıç seed'i
+- [x] `MainRole`, `MainRoleAndRoleRelationship`, `MainRoleAndUserRelationship` feature'ları — master
+      DB'de, Framework base sınıfları üzerine kurulu tam CRUD
+- [x] `OnlineAccountingApp.Application.Tests` — xUnit + Moq ile Auth, Company, Role, MainRole ve
+      ilişki, UniformChartOfAccount feature'larının handler testleri
 - [ ] **Kullanıcıyı şirkete atama uç noktaları** — şu an `UserCompany` kayıtları elle
       ekleniyor (yukarıdaki nota bakın)
-- [ ] Rol yönetimi ve başlangıç seed'i (Admin/User)
 - [ ] `Me` ucu — kullanıcının erişebildiği şirketleri listeler
+- [ ] `MainRole` feature'larının gRPC'ye taşınması — şu an yalnızca REST üzerinden erişilebiliyor
 - [ ] `Infrastructure` katmanının kalanının doldurulması (e-posta, dosya, dış servisler)
 - [ ] Şirket bağlantı parolalarının şifrelenmesi
-- [ ] Test projesi
 
 ---
 
@@ -894,6 +968,62 @@ Requires a token; the `X-Company-Id` header is **not required**.
 | `DELETE` | `/api/Companies/DeleteCompany/{id}` | Deletes a company (soft delete) |
 | `GET` | `/api/Companies/MigrateCompanyDb` | Applies migrations to every company database |
 
+### Roles — master database
+
+Requires a token; the `X-Company-Id` header is **not required**. `AppRole` comes from ASP.NET
+Identity, so this feature does not use the Framework base classes (see [Architecture](#architecture)).
+
+| Method | Path | Description |
+| --- | --- | --- |
+| `POST` | `/api/Roles/CreateRole` | Creates a new role (`Name`, `Code`) |
+| `POST` | `/api/Roles/CreateAllRoles` | Bulk-creates every defined role (initial seed) |
+| `GET` | `/api/Roles/GetRoles` | Paged role list |
+| `GET` | `/api/Roles/GetRoleById/{id}` | Returns a single role |
+| `PUT` | `/api/Roles/UpdateRole/{id}` | Updates a role |
+| `DELETE` | `/api/Roles/DeleteRole/{id}` | Deletes a role (soft delete) |
+| `POST` | `/api/Roles/AssignRoleToUser` | Assigns a role to a user (`UserId`, `RoleCode`) |
+| `DELETE` | `/api/Roles/RemoveRoleFromUser` | Removes a role from a user (`UserId`, `RoleName`) |
+| `GET` | `/api/Roles/GetUserRoles/{userId}` | Lists the roles a user has |
+
+### MainRoles — master database
+
+Requires a token; the `X-Company-Id` header is **not required**. `MainRole` (`Title`,
+`IsRoleCreateByAdmin`, `CompanyId`) derives from `BaseEntity` and uses the Framework base classes.
+
+| Method | Path | Description |
+| --- | --- | --- |
+| `POST` | `/api/MainRoles/CreateMainRole` | Creates a new main role |
+| `GET` | `/api/MainRoles/GetMainRoles` | Paged main role list |
+| `GET` | `/api/MainRoles/GetMainRoleById/{id}` | Returns a single main role |
+| `PUT` | `/api/MainRoles/UpdateMainRole/{id}` | Updates a main role |
+| `DELETE` | `/api/MainRoles/DeleteMainRole/{id}` | Deletes a main role (soft delete) |
+
+### MainRoleAndRoleRelationships — master database
+
+Manages the relationship between a `MainRole` and an `AppRole` (`RoleId`, `MainRoleId`). Requires a
+token; the `X-Company-Id` header is not required.
+
+| Method | Path | Description |
+| --- | --- | --- |
+| `POST` | `/api/MainRoleAndRoleRelationships/CreateMainRoleAndRoleRelationship` | Adds a new relationship |
+| `GET` | `/api/MainRoleAndRoleRelationships/GetMainRoleAndRoleRelationships` | Paged list |
+| `GET` | `/api/MainRoleAndRoleRelationships/GetMainRoleAndRoleRelationshipById/{id}` | Returns a single entry |
+| `PUT` | `/api/MainRoleAndRoleRelationships/UpdateMainRoleAndRoleRelationship/{id}` | Updates an entry |
+| `DELETE` | `/api/MainRoleAndRoleRelationships/DeleteMainRoleAndRoleRelationship/{id}` | Deletes an entry (soft delete) |
+
+### MainRoleAndUserRelationships — master database
+
+Manages the relationship between a `MainRole` and an `AppUser` (`UserId`, `MainRoleId`,
+`CompanyId`). Requires a token; the `X-Company-Id` header is not required.
+
+| Method | Path | Description |
+| --- | --- | --- |
+| `POST` | `/api/MainRoleAndUserRelationships/CreateMainRoleAndUserRelationship` | Adds a new relationship |
+| `GET` | `/api/MainRoleAndUserRelationships/GetMainRoleAndUserRelationships` | Paged list |
+| `GET` | `/api/MainRoleAndUserRelationships/GetMainRoleAndUserRelationshipById/{id}` | Returns a single entry |
+| `PUT` | `/api/MainRoleAndUserRelationships/UpdateMainRoleAndUserRelationship/{id}` | Updates an entry |
+| `DELETE` | `/api/MainRoleAndUserRelationships/DeleteMainRoleAndUserRelationship/{id}` | Deletes an entry (soft delete) |
+
 ### UniformChartOfAccounts — company database
 
 Every endpoint **requires** the `X-Company-Id` header in addition to the token, and verifies the
@@ -907,15 +1037,16 @@ user's membership of that company.
 | `PUT` | `/api/UniformChartOfAccounts/UpdateUniformChartOfAccount/{id}` | Updates an entry |
 | `DELETE` | `/api/UniformChartOfAccounts/DeleteUniformChartOfAccount/{id}` | Deletes an entry (soft delete) |
 
-**Paging parameters** (for both list endpoints):
+**Paging parameters** (for list endpoints):
 
 | Parameter | Default | Rule |
 | --- | --- | --- |
 | `pageNumber` | `1` | `>= 1` |
 | `pageSize` | `20` | `1` – `100` |
-| `searchTerm` | — | Matches `Name` for companies; `Code` or `Name` for chart of accounts |
+| `searchTerm` | — | Matches `Name` for companies and roles; `Title` for main roles; `Code` or `Name` for chart of accounts |
 
-Soft-deleted records are excluded from both list and single-record queries.
+`GetMainRoleAndRoleRelationships` and `GetMainRoleAndUserRelationships` are paged but don't support
+`searchTerm`. Soft-deleted records are excluded from both list and single-record queries.
 
 ## gRPC Service
 
@@ -1025,6 +1156,18 @@ HTTP status.
 | `04401` | 401 | Missing/invalid token, wrong password, or invalid refresh token |
 | `04403` | 403 | The user has no access to this company |
 | `04409` | 409 | A user with this email already exists |
+| `05400` | 400 | Role validation error |
+| `05404` | 404 | Role not found |
+| `05409` | 409 | A role with the same name/code already exists |
+| `06400` | 400 | Main role validation error |
+| `06404` | 404 | Main role not found |
+| `06409` | 409 | A main role with the same title already exists |
+| `07400` | 400 | MainRole-Role relationship validation error |
+| `07404` | 404 | MainRole-Role relationship not found |
+| `07409` | 409 | The same MainRole-Role relationship already exists |
+| `08400` | 400 | MainRole-User relationship validation error |
+| `08404` | 404 | MainRole-User relationship not found |
+| `08409` | 409 | The same MainRole-User relationship already exists |
 
 ## Adding a Feature
 
@@ -1075,10 +1218,15 @@ steps:
 - [x] Validate the `X-Company-Id` header against `UserCompany` (cross-tenant access closed)
 - [x] `OnlineAccountingApp.Framework` — generic, template-method MediatR base classes for
       Create/Update/Delete/GetById/GetList (`Company` and `UniformChartOfAccount` are built on it)
+- [x] Role management — `RolesController` (CRUD, assign/remove role for a user) plus
+      `CreateAllRoles` for bulk initial seeding
+- [x] `MainRole`, `MainRoleAndRoleRelationship`, `MainRoleAndUserRelationship` features — full CRUD
+      in the master DB, built on the Framework base classes
+- [x] `OnlineAccountingApp.Application.Tests` — xUnit + Moq handler tests for the Auth, Company,
+      Role, MainRole and relationship, and UniformChartOfAccount features
 - [ ] **Assign-user-to-company endpoints** — `UserCompany` rows are currently inserted by hand
       (see the note above)
-- [ ] Role management and initial seeding (Admin/User)
 - [ ] A `Me` endpoint listing the companies a user can access
+- [ ] Move the `MainRole` features to gRPC — currently REST-only
 - [ ] Fill in the rest of the `Infrastructure` layer (email, files, external services)
 - [ ] Encrypt company connection passwords
-- [ ] Test project
