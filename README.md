@@ -69,7 +69,7 @@ gerçekten erişim hakkı olduğu bir şirket olmak zorundadır.
 ```bash
 # 1. Depoyu klonlayın
 git clone https://github.com/aliyilmaz020/OnlineAccountingApp.git
-cd OnlineAccountingApp
+cd OnlineAccountingApp/api
 
 # 2. Bağlantı dizesini yapılandırın (aşağıdaki nota bakın)
 
@@ -169,7 +169,7 @@ da, şema değişikliğini tüm kiracılara yaydıktan sonra da bu uç nokta ça
 Clean Architecture; bağımlılıklar daima içe doğru akar.
 
 ```
-OnlineAccountingApp/
+api/
 ├── OnlineAccountingApp.Domain/          # Bağımlılıksız çekirdek
 │   ├── Abstracts/BaseEntity.cs          # Id, CreateDate, EditDate, Status, Deleted
 │   ├── AppEntities/                     # Master DB: Company, UserCompany, AppUser, AppRole
@@ -727,7 +727,7 @@ actually has access to, via `UserCompany`.
 ```bash
 # 1. Clone the repository
 git clone https://github.com/aliyilmaz020/OnlineAccountingApp.git
-cd OnlineAccountingApp
+cd OnlineAccountingApp/api
 
 # 2. Configure the connection string (see the note below)
 
@@ -826,7 +826,7 @@ after adding a schema change that must reach all existing tenants.
 Clean Architecture; dependencies always point inward.
 
 ```
-OnlineAccountingApp/
+api/
 ├── OnlineAccountingApp.Domain/          # Dependency-free core
 │   ├── Abstracts/BaseEntity.cs          # Id, CreateDate, EditDate, Status, Deleted
 │   ├── AppEntities/                     # Master DB: Company, UserCompany, AppUser, AppRole
