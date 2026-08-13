@@ -8,6 +8,7 @@ public static partial class ApiConfig
         {
             services.AddConfigureSwagger();
             services.AddConfigureErrorHandling();
+            services.AddConfigureCors();
         }
     }
 }

@@ -1,8 +1,10 @@
 using Moq;
 using OnlineAccountingApp.Application.Features.AppFeatures.CompanyFeature.Create;
 using OnlineAccountingApp.Application.Features.AppFeatures.CompanyFeature.GetCompanies;
+using OnlineAccountingApp.Application.Services.CompanyServices;
 using OnlineAccountingApp.Application.Tests.TestHelpers;
 using OnlineAccountingApp.Domain.AppEntities;
+using OnlineAccountingApp.Domain.Entities;
 using OnlineAccountingApp.Domain.Exceptions;
 using OnlineAccountingApp.Framework.Services;
 using System.Linq.Expressions;
@@ -25,10 +27,19 @@ public class CreateCompanyCommandHandlerTests
         ServerPassword = "password"
     };
 
+    private static Mock<ICompanyContext> BuildCompanyContext(string? userId = "user-1")
+    {
+        Mock<ICompanyContext> companyContext = new();
+        companyContext.Setup(c => c.UserId).Returns(userId);
+        return companyContext;
+    }
+
     [Fact]
     public async Task Handle_ShouldCreateCompany_WhenNameDoesNotExist()
     {
         (Mock<IUnitOfWork> unitOfWork, Mock<IRepository<Company>> repository) = UnitOfWorkMockFactory.Create<Company>();
+        Mock<IRepository<UserCompany>> userCompanyRepository = new();
+        unitOfWork.Setup(u => u.Repository<UserCompany>()).Returns(userCompanyRepository.Object);
 
         repository.Setup(r => r.ExistsAsync(It.IsAny<System.Linq.Expressions.Expression<Func<Company, bool>>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
@@ -38,8 +49,11 @@ public class CreateCompanyCommandHandlerTests
                 entity.Id = "generated-id";
                 return Task.FromResult(entity);
             });
+        userCompanyRepository.Setup(r => r.CreateAsync(It.IsAny<UserCompany>(), It.IsAny<CancellationToken>()))
+            .Returns<UserCompany, CancellationToken>((entity, _) => Task.FromResult(entity));
 
-        CreateCompanyCommandHandler handler = new(unitOfWork.Object);
+        Mock<ICompanyContext> companyContext = BuildCompanyContext();
+        CreateCompanyCommandHandler handler = new(unitOfWork.Object, companyContext.Object);
         CreateCompanyCommand command = BuildCommand();
 
         CompanyListItemDto result = await handler.Handle(command, CancellationToken.None);
@@ -49,6 +63,9 @@ public class CreateCompanyCommandHandlerTests
         Assert.Equal(command.Email, result.Email);
 
         repository.Verify(r => r.CreateAsync(It.IsAny<Company>(), It.IsAny<CancellationToken>()), Times.Once);
+        userCompanyRepository.Verify(r => r.CreateAsync(
+            It.Is<UserCompany>(uc => uc.AppUserId == "user-1" && uc.CompanyId == "generated-id"),
+            It.IsAny<CancellationToken>()), Times.Once);
         unitOfWork.Verify(u => u.BeginTransactionAsync(It.IsAny<CancellationToken>()), Times.Once);
         unitOfWork.Verify(u => u.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -63,7 +80,8 @@ public class CreateCompanyCommandHandlerTests
             .Callback<Expression<Func<Company, bool>>, CancellationToken>((predicate, _) => capturedPredicate = predicate)
             .ReturnsAsync(true);
 
-        CreateCompanyCommandHandler handler = new(unitOfWork.Object);
+        Mock<ICompanyContext> companyContext = BuildCompanyContext();
+        CreateCompanyCommandHandler handler = new(unitOfWork.Object, companyContext.Object);
         CreateCompanyCommand command = BuildCommand();
 
         BusinessException exception = await Assert.ThrowsAsync<BusinessException>(
