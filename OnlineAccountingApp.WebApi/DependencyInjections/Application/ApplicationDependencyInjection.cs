@@ -28,6 +28,7 @@ public static partial class ApplicationDependencyInjection
             services.AddScoped<IRefreshTokenService, RefreshTokenService>();
             services.AddScoped<IUniformChartOfAccountService, UniformChartOfAccountService>();
             services.AddScoped<IRoleService, RoleService>();
+            services.AddScoped<ISeedService, SeedService>();
         }
     }
 }
