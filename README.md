@@ -21,10 +21,11 @@ API'si. Clean Architecture katmanlaması, MediatR ile CQRS ve EF Core üzerine k
 5. [Mimari](#mimari)
 6. [Çok Kiracılılık Modeli](#çok-kiracılılık-modeli)
 7. [API Referansı](#api-referansı)
-8. [gRPC Servisi](#grpc-servisi)
-9. [Yanıt Zarfı ve Hata Kodları](#yanıt-zarfı-ve-hata-kodları)
-10. [Yeni Feature Ekleme](#yeni-feature-ekleme)
-11. [Yol Haritası](#yol-haritası)
+8. [Örnek Veri Doldurma (Seed)](#örnek-veri-doldurma-seed)
+9. [gRPC Servisi](#grpc-servisi)
+10. [Yanıt Zarfı ve Hata Kodları](#yanıt-zarfı-ve-hata-kodları)
+11. [Yeni Feature Ekleme](#yeni-feature-ekleme)
+12. [Yol Haritası](#yol-haritası)
 
 ## Genel Bakış
 
@@ -408,6 +409,42 @@ gerekir; `X-Company-Id` başlığı gerekmez.
 | `PUT` | `/api/MainRoleAndUserRelationships/UpdateMainRoleAndUserRelationship/{id}` | Kaydı günceller |
 | `DELETE` | `/api/MainRoleAndUserRelationships/DeleteMainRoleAndUserRelationship/{id}` | Kaydı siler (soft delete) |
 
+### Seed — master veritabanı
+
+Geliştirme ortamı için örnek veri oluşturur. Token gerekir; `X-Company-Id` başlığı gerekmez.
+
+| Metot | Yol | Açıklama |
+| --- | --- | --- |
+| `POST` | `/api/Seed/SeedSampleData` | Master veritabanına örnek şirket/kullanıcı/rol verisi ekler |
+
+Statik UCAF izin rollerini, iki örnek şirketi, şirket başına iki kullanıcıyı ve bunları
+birbirine bağlayan `MainRole` / ilişki kayıtlarını oluşturur. İşlem idempotenttir: her adım önce
+doğal anahtara göre var olup olmadığını kontrol eder, bu yüzden tekrar çağırmak kayıt
+çoğaltmaz. Şirket veritabanları (tenant) kapsam dışıdır — bunun için erişilebilir bir
+per-company SQL Server bağlantısı gerekirdi. Oluşturulan örnek kullanıcıların parolası
+`Test.123`'tür.
+
+```json
+{
+  "success": true,
+  "data": {
+    "permissionRolesCreated": 0,
+    "companiesCreated": 2,
+    "usersCreated": 4,
+    "userCompanyLinksCreated": 4,
+    "mainRolesCreated": 4,
+    "mainRoleRoleLinksCreated": 0,
+    "mainRoleUserLinksCreated": 4
+  },
+  "errorCode": null,
+  "message": null,
+  "errors": null
+}
+```
+
+> Sayaçlar yalnızca o çağrıda **yeni oluşturulan** kayıtları sayar; kayıtlar zaten varsa (örn.
+> roller `CreateAllRoles` ile önceden oluşturulmuşsa) ilgili alan `0` döner.
+
 ### UniformChartOfAccounts — şirket veritabanı
 
 Tüm uç noktalar token'a ek olarak `X-Company-Id` başlığını **zorunlu** kılar ve kullanıcının o
@@ -608,6 +645,8 @@ adımlar:
       DB'de, Framework base sınıfları üzerine kurulu tam CRUD
 - [x] `OnlineAccountingApp.Application.Tests` — xUnit + Moq ile Auth, Company, Role, MainRole ve
       ilişki, UniformChartOfAccount feature'larının handler testleri
+- [x] `POST /api/Seed/SeedSampleData` — master veritabanı için idempotent örnek veri doldurma
+      uç noktası (bkz. [Örnek Veri Doldurma (Seed)](#örnek-veri-doldurma-seed))
 - [ ] **Kullanıcıyı şirkete atama uç noktaları** — şu an `UserCompany` kayıtları elle
       ekleniyor (yukarıdaki nota bakın)
 - [ ] `Me` ucu — kullanıcının erişebildiği şirketleri listeler
@@ -640,10 +679,11 @@ Architecture layering, CQRS via MediatR, and EF Core.
 5. [Architecture](#architecture)
 6. [Multi-Tenancy Model](#multi-tenancy-model)
 7. [API Reference](#api-reference)
-8. [gRPC Service](#grpc-service)
-9. [Response Envelope and Error Codes](#response-envelope-and-error-codes)
-10. [Adding a Feature](#adding-a-feature)
-11. [Roadmap](#roadmap)
+8. [Sample Data Seeding](#sample-data-seeding)
+9. [gRPC Service](#grpc-service)
+10. [Response Envelope and Error Codes](#response-envelope-and-error-codes)
+11. [Adding a Feature](#adding-a-feature)
+12. [Roadmap](#roadmap)
 
 ## Overview
 
@@ -1024,6 +1064,42 @@ Manages the relationship between a `MainRole` and an `AppUser` (`UserId`, `MainR
 | `PUT` | `/api/MainRoleAndUserRelationships/UpdateMainRoleAndUserRelationship/{id}` | Updates an entry |
 | `DELETE` | `/api/MainRoleAndUserRelationships/DeleteMainRoleAndUserRelationship/{id}` | Deletes an entry (soft delete) |
 
+### Seed — master database
+
+Fills the master database with development sample data. Requires a token; the `X-Company-Id`
+header is not required.
+
+| Method | Path | Description |
+| --- | --- | --- |
+| `POST` | `/api/Seed/SeedSampleData` | Seeds the master database with sample companies/users/roles |
+
+Creates the static UCAF permission roles, two sample companies, two users per company, and the
+`MainRole` / relationship rows that link them together. The operation is idempotent: every step
+checks by natural key first, so calling it again never duplicates rows. Company (tenant)
+databases are out of scope, since that would require a reachable per-company SQL Server
+connection. The password for every seeded sample user is `Test.123`.
+
+```json
+{
+  "success": true,
+  "data": {
+    "permissionRolesCreated": 0,
+    "companiesCreated": 2,
+    "usersCreated": 4,
+    "userCompanyLinksCreated": 4,
+    "mainRolesCreated": 4,
+    "mainRoleRoleLinksCreated": 0,
+    "mainRoleUserLinksCreated": 4
+  },
+  "errorCode": null,
+  "message": null,
+  "errors": null
+}
+```
+
+> The counters only reflect rows **newly created** by that call; if the rows already exist (e.g.
+> the roles were already created via `CreateAllRoles`), the matching field returns `0`.
+
 ### UniformChartOfAccounts — company database
 
 Every endpoint **requires** the `X-Company-Id` header in addition to the token, and verifies the
@@ -1224,6 +1300,8 @@ steps:
       in the master DB, built on the Framework base classes
 - [x] `OnlineAccountingApp.Application.Tests` — xUnit + Moq handler tests for the Auth, Company,
       Role, MainRole and relationship, and UniformChartOfAccount features
+- [x] `POST /api/Seed/SeedSampleData` — idempotent sample-data seeding endpoint for the master
+      database (see [Sample Data Seeding](#sample-data-seeding))
 - [ ] **Assign-user-to-company endpoints** — `UserCompany` rows are currently inserted by hand
       (see the note above)
 - [ ] A `Me` endpoint listing the companies a user can access
