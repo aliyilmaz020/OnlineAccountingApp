@@ -1,0 +1,6 @@
+{
+  "title": "Roles",
+  "description": "Role management",
+  "columns": { "name": "Name", "code": "Code", "status": "Status" },
+  "form": { "roleName": "Role Name", "code": "Code", "active": "Active" }
+}

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import type { useCrud } from "../../hooks/useCrud";
 import { ApiError } from "../../lib/apiError";
 import Button from "../ui/button/Button";
@@ -32,6 +33,7 @@ export default function CrudPage<TListItem extends { id: string }, TCreateReq, T
   props: CrudPageProps<TListItem, TCreateReq, TUpdateReq>,
 ) {
   const { title, crud, columns, renderForm } = props;
+  const { t } = useTranslation("crud");
   const createModal = useModal();
   const [editingItem, setEditingItem] = useState<TListItem | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,7 +46,7 @@ export default function CrudPage<TListItem extends { id: string }, TCreateReq, T
       await crud.create(values);
       createModal.closeModal();
     } catch (err) {
-      setFormError(err instanceof ApiError ? err.message : "Kaydedilemedi.");
+      setFormError(err instanceof ApiError ? err.message : t("saveFailed"));
     } finally {
       setIsSubmitting(false);
     }
@@ -58,19 +60,19 @@ export default function CrudPage<TListItem extends { id: string }, TCreateReq, T
       await crud.update(editingItem.id, values);
       setEditingItem(null);
     } catch (err) {
-      setFormError(err instanceof ApiError ? err.message : "Guncellenemedi.");
+      setFormError(err instanceof ApiError ? err.message : t("updateFailed"));
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDelete = async (item: TListItem) => {
-    const confirmed = window.confirm("Bu kaydi silmek istediginize emin misiniz?");
+    const confirmed = window.confirm(t("deleteConfirm"));
     if (!confirmed) return;
     try {
       await crud.remove(item.id);
     } catch (err) {
-      window.alert(err instanceof ApiError ? err.message : "Silinemedi.");
+      window.alert(err instanceof ApiError ? err.message : t("deleteFailed"));
     }
   };
 
@@ -80,7 +82,7 @@ export default function CrudPage<TListItem extends { id: string }, TCreateReq, T
         <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">{title}</h3>
         <div className="flex items-center gap-3">
           <Input
-            placeholder="Ara..."
+            placeholder={t("searchPlaceholder")}
             value={crud.searchTerm}
             onChange={(e) => crud.setSearchTerm(e.target.value)}
           />
@@ -91,14 +93,14 @@ export default function CrudPage<TListItem extends { id: string }, TCreateReq, T
               createModal.openModal();
             }}
           >
-            Yeni Ekle
+            {t("addNew")}
           </Button>
         </div>
       </div>
 
       {crud.error && (
         <div className="mb-4">
-          <Alert variant="error" title="Hata" message={crud.error} />
+          <Alert variant="error" title={t("errorTitle")} message={crud.error} />
         </div>
       )}
 
@@ -119,7 +121,7 @@ export default function CrudPage<TListItem extends { id: string }, TCreateReq, T
                 isHeader
                 className="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400"
               >
-                Islemler
+                {t("actions")}
               </TableCell>
             </TableRow>
           </TableHeader>
@@ -127,13 +129,13 @@ export default function CrudPage<TListItem extends { id: string }, TCreateReq, T
             {crud.isLoading ? (
               <TableRow>
                 <TableCell className="px-4 py-4 text-gray-500" colSpan={columns.length + 1}>
-                  Yukleniyor...
+                  {t("loading")}
                 </TableCell>
               </TableRow>
             ) : crud.items.length === 0 ? (
               <TableRow>
                 <TableCell className="px-4 py-4 text-gray-500" colSpan={columns.length + 1}>
-                  Kayit bulunamadi.
+                  {t("noRecords")}
                 </TableCell>
               </TableRow>
             ) : (
@@ -153,13 +155,13 @@ export default function CrudPage<TListItem extends { id: string }, TCreateReq, T
                           setEditingItem(item);
                         }}
                       >
-                        Duzenle
+                        {t("edit")}
                       </button>
                       <button
                         className="text-error-500 hover:text-error-600"
                         onClick={() => handleDelete(item)}
                       >
-                        Sil
+                        {t("delete")}
                       </button>
                     </div>
                   </TableCell>
@@ -171,7 +173,7 @@ export default function CrudPage<TListItem extends { id: string }, TCreateReq, T
       </div>
 
       <div className="mt-4 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-        <span>Toplam {crud.totalCount} kayit</span>
+        <span>{t("totalCount", { count: crud.totalCount })}</span>
         <div className="flex items-center gap-2">
           <Button
             size="sm"
@@ -179,10 +181,10 @@ export default function CrudPage<TListItem extends { id: string }, TCreateReq, T
             disabled={crud.pageNumber <= 1}
             onClick={() => crud.setPageNumber(crud.pageNumber - 1)}
           >
-            Onceki
+            {t("previous")}
           </Button>
           <span>
-            Sayfa {crud.pageNumber} / {Math.max(crud.totalPages, 1)}
+            {t("pageIndicator", { page: crud.pageNumber, totalPages: Math.max(crud.totalPages, 1) })}
           </span>
           <Button
             size="sm"
@@ -190,16 +192,16 @@ export default function CrudPage<TListItem extends { id: string }, TCreateReq, T
             disabled={crud.pageNumber >= crud.totalPages}
             onClick={() => crud.setPageNumber(crud.pageNumber + 1)}
           >
-            Sonraki
+            {t("next")}
           </Button>
         </div>
       </div>
 
       <Modal isOpen={createModal.isOpen} onClose={createModal.closeModal} className="max-w-lg p-6">
-        <h4 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">Yeni {title}</h4>
+        <h4 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">{t("newItemTitle", { title })}</h4>
         {formError && (
           <div className="mb-4">
-            <Alert variant="error" title="Hata" message={formError} />
+            <Alert variant="error" title={t("errorTitle")} message={formError} />
           </div>
         )}
         {renderForm({
@@ -210,10 +212,10 @@ export default function CrudPage<TListItem extends { id: string }, TCreateReq, T
       </Modal>
 
       <Modal isOpen={editingItem !== null} onClose={() => setEditingItem(null)} className="max-w-lg p-6">
-        <h4 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">{title} Duzenle</h4>
+        <h4 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">{t("editItemTitle", { title })}</h4>
         {formError && (
           <div className="mb-4">
-            <Alert variant="error" title="Hata" message={formError} />
+            <Alert variant="error" title={t("errorTitle")} message={formError} />
           </div>
         )}
         {editingItem &&

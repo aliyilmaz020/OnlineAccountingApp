@@ -1,6 +1,7 @@
 import type { ApiResponse } from "../types/api";
 import type { AuthResponse } from "../types/auth";
 import { ApiError } from "./apiError";
+import i18next from "../i18n/config";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
@@ -52,7 +53,7 @@ let refreshPromise: Promise<string> | null = null;
 async function doRefresh(): Promise<string> {
   const refreshToken = getRefreshToken();
   if (!refreshToken) {
-    throw new ApiError("Oturum süresi doldu, lütfen tekrar giriş yapın.", null, null, 401);
+    throw new ApiError(i18next.t("common:errors.sessionExpired"), null, null, 401);
   }
 
   const res = await fetch(`${BASE_URL}/api/Auth/RefreshToken`, {
@@ -64,7 +65,7 @@ async function doRefresh(): Promise<string> {
 
   if (!body.success || !body.data) {
     clearTokens();
-    throw new ApiError(body.message ?? "Oturum yenilenemedi.", body.errorCode, body.errors, res.status);
+    throw new ApiError(body.message ?? i18next.t("common:errors.sessionRefreshFailed"), body.errorCode, body.errors, res.status);
   }
 
   setTokens(body.data);
@@ -133,7 +134,7 @@ async function request<T>(path: string, options: RequestOptions, isRetry = false
     if (res.status === 401) {
       unauthorizedHandler?.();
     }
-    throw new ApiError(body.message ?? "İşlem başarısız oldu.", body.errorCode, body.errors, res.status);
+    throw new ApiError(body.message ?? i18next.t("common:errors.requestFailed"), body.errorCode, body.errors, res.status);
   }
 
   return body.data as T;

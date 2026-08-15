@@ -1,0 +1,14 @@
+{
+  "dashboard": "OnlineAccountingApp | Dashboard",
+  "profile": "OnlineAccountingApp | Profile",
+  "companies": "OnlineAccountingApp | Companies",
+  "roles": "OnlineAccountingApp | Roles",
+  "mainRoles": "OnlineAccountingApp | Main Roles",
+  "mainRoleRoleRelationships": "OnlineAccountingApp | Main Role - Role Relationships",
+  "mainRoleUserRelationships": "OnlineAccountingApp | Main Role - User Relationships",
+  "uniformChartOfAccounts": "OnlineAccountingApp | Uniform Chart of Accounts",
+  "selectCompany": "OnlineAccountingApp | Select Company",
+  "signIn": "OnlineAccountingApp | Sign In",
+  "signUp": "OnlineAccountingApp | Sign Up",
+  "notFound": "OnlineAccountingApp | Page Not Found"
+}

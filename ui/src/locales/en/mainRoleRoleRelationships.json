@@ -1,0 +1,6 @@
+{
+  "title": "Main Role - Role Relationships",
+  "description": "Main role and role relationship management",
+  "columns": { "roleId": "Role Id", "mainRoleId": "Main Role Id" },
+  "form": { "role": "Role", "rolePlaceholder": "Select role", "mainRole": "Main Role", "mainRolePlaceholder": "Select main role" }
+}

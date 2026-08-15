@@ -1,8 +1,9 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import "swiper/swiper-bundle.css";
 import "flatpickr/dist/flatpickr.css";
+import i18n from "./i18n/config";
+import { I18nextProvider } from "react-i18next";
 import App from "./App.tsx";
 import { AppWrapper } from "./components/common/PageMeta.tsx";
 import { ThemeProvider } from "./context/ThemeContext.tsx";
@@ -11,14 +12,16 @@ import { CompanyProvider } from "./context/CompanyContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <ThemeProvider>
-      <AuthProvider>
-        <CompanyProvider>
-          <AppWrapper>
-            <App />
-          </AppWrapper>
-        </CompanyProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <I18nextProvider i18n={i18n}>
+      <ThemeProvider>
+        <AuthProvider>
+          <CompanyProvider>
+            <AppWrapper>
+              <App />
+            </AppWrapper>
+          </CompanyProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </I18nextProvider>
   </StrictMode>,
 );

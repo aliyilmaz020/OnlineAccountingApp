@@ -1,0 +1,6 @@
+{
+  "title": "Main Roles",
+  "description": "Main role management",
+  "columns": { "title": "Title", "company": "Company", "adminCanCreate": "Admin Can Create" },
+  "form": { "title": "Title", "company": "Company", "companyPlaceholder": "Select company", "adminCanCreate": "Can be created by admin" }
+}

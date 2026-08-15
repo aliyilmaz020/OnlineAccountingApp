@@ -1,0 +1,25 @@
+{
+  "title": "Şirketler",
+  "description": "Şirket yönetimi",
+  "columns": {
+    "name": "Ad",
+    "email": "E-posta",
+    "phone": "Telefon",
+    "taxDepartment": "Vergi Dairesi"
+  },
+  "form": {
+    "serverInfoWarningTitle": "Dikkat",
+    "serverInfoWarning": "Sunucu bilgileri (Server/Database/User/Password) güvenlik nedeniyle geri gösterilmez. Bu alanları boş bırakırsanız mevcut bağlantı bilgileri silinir - değiştirmek istemiyorsanız aynı değerleri tekrar girin.",
+    "companyName": "Şirket Adı",
+    "address": "Adres",
+    "identityNumber": "Vergi No / Kimlik No",
+    "taxDepartment": "Vergi Dairesi",
+    "phoneNumber": "Telefon",
+    "email": "E-posta",
+    "dbSectionTitle": "Veritabanı Bağlantı Bilgileri",
+    "serverName": "Sunucu Adı",
+    "databaseName": "Veritabanı Adı",
+    "serverUserId": "Sunucu Kullanıcı Adı",
+    "serverPassword": "Sunucu Şifresi"
+  }
+}

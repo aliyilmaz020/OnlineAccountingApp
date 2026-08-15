@@ -1,0 +1,20 @@
+{
+  "saveFailed": "Kaydedilemedi.",
+  "updateFailed": "Güncellenemedi.",
+  "deleteConfirm": "Bu kaydı silmek istediğinize emin misiniz?",
+  "deleteFailed": "Silinemedi.",
+  "searchPlaceholder": "Ara...",
+  "addNew": "Yeni Ekle",
+  "errorTitle": "Hata",
+  "actions": "İşlemler",
+  "loading": "Yükleniyor...",
+  "noRecords": "Kayıt bulunamadı.",
+  "edit": "Düzenle",
+  "delete": "Sil",
+  "totalCount": "Toplam {{count}} kayıt",
+  "previous": "Önceki",
+  "pageIndicator": "Sayfa {{page}} / {{totalPages}}",
+  "next": "Sonraki",
+  "newItemTitle": "Yeni {{title}}",
+  "editItemTitle": "{{title}} Düzenle"
+}

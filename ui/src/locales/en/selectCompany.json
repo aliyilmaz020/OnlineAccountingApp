@@ -1,0 +1,13 @@
+{
+  "pageTitle": "Select Company",
+  "pageDescription": "Select the company you want to work with",
+  "heading": "Select a Company",
+  "subheading": "Select a company to continue, or create a new one.",
+  "loading": "Loading...",
+  "empty": "You don't have a company yet.",
+  "createNew": "Create New Company",
+  "select": "Select",
+  "createModalTitle": "New Company",
+  "errorTitle": "Error",
+  "createFailed": "Could not create company."
+}

@@ -1,14 +1,17 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
+import Button from "../ui/button/Button";
 import Alert from "../ui/alert/Alert";
 import { useAuth } from "../../context/AuthContext";
 import { ApiError } from "../../lib/apiError";
 
 export default function SignUpForm() {
+  const { t } = useTranslation("auth");
   const { register } = useAuth();
   const navigate = useNavigate();
 
@@ -27,7 +30,7 @@ export default function SignUpForm() {
       await register(email, password);
       navigate("/select-company");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Kayıt oluşturulamadı.");
+      setError(err instanceof ApiError ? err.message : t("signUp.errorFallback"));
     } finally {
       setIsSubmitting(false);
     }
@@ -41,23 +44,23 @@ export default function SignUpForm() {
           className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
         >
           <ChevronLeftIcon className="size-5" />
-          Back to dashboard
+          {t("backToDashboard")}
         </Link>
       </div>
       <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
         <div>
           <div className="mb-5 sm:mb-8">
             <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
-              Sign Up
+              {t("signUp.heading")}
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Enter your email and password to sign up!
+              {t("signUp.subheading")}
             </p>
           </div>
           <div>
             {error && (
               <div className="mb-5">
-                <Alert variant="error" title="Kayıt başarısız" message={error} />
+                <Alert variant="error" title={t("signUp.errorTitle")} message={error} />
               </div>
             )}
             <form onSubmit={handleSubmit}>
@@ -65,13 +68,13 @@ export default function SignUpForm() {
                 {/* <!-- Email --> */}
                 <div>
                   <Label>
-                    Email<span className="text-error-500">*</span>
+                    {t("signIn.email")}<span className="text-error-500">*</span>
                   </Label>
                   <Input
                     type="email"
                     id="email"
                     name="email"
-                    placeholder="Enter your email"
+                    placeholder={t("signUp.emailPlaceholder")}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
@@ -79,11 +82,11 @@ export default function SignUpForm() {
                 {/* <!-- Password --> */}
                 <div>
                   <Label>
-                    Password<span className="text-error-500">*</span>
+                    {t("signIn.password")}<span className="text-error-500">*</span>
                   </Label>
                   <div className="relative">
                     <Input
-                      placeholder="Enter your password"
+                      placeholder={t("signIn.passwordPlaceholder")}
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -100,7 +103,7 @@ export default function SignUpForm() {
                     </span>
                   </div>
                   <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                    En az 6 karakter; büyük harf, küçük harf, rakam ve özel karakter içermeli.
+                    {t("signUp.passwordHint")}
                   </p>
                 </div>
                 {/* <!-- Checkbox --> */}
@@ -111,36 +114,33 @@ export default function SignUpForm() {
                     onChange={setIsChecked}
                   />
                   <p className="inline-block font-normal text-gray-500 dark:text-gray-400">
-                    By creating an account means you agree to the{" "}
+                    {t("signUp.agreementPrefix")}{" "}
                     <span className="text-gray-800 dark:text-white/90">
-                      Terms and Conditions,
+                      {t("signUp.terms")}
                     </span>{" "}
-                    and our{" "}
+                    {t("signUp.agreementMiddle")}{" "}
                     <span className="text-gray-800 dark:text-white">
-                      Privacy Policy
+                      {t("signUp.privacyPolicy")}
                     </span>
                   </p>
                 </div>
                 {/* <!-- Button --> */}
                 <div>
-                  <button
-                    disabled={isSubmitting}
-                    className="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:opacity-50"
-                  >
-                    {isSubmitting ? "Kaydediliyor..." : "Sign Up"}
-                  </button>
+                  <Button type="submit" className="w-full" size="sm" disabled={isSubmitting}>
+                    {isSubmitting ? t("signUp.submitting") : t("signUp.submit")}
+                  </Button>
                 </div>
               </div>
             </form>
 
             <div className="mt-5">
               <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
-                Already have an account? {""}
+                {t("signUp.hasAccount")} {""}
                 <Link
                   to="/signin"
                   className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
                 >
-                  Sign In
+                  {t("signUp.signInLink")}
                 </Link>
               </p>
             </div>

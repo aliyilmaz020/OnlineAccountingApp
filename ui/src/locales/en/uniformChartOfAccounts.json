@@ -1,0 +1,6 @@
+{
+  "title": "Uniform Chart of Accounts",
+  "description": "Uniform chart of accounts management",
+  "columns": { "code": "Code", "name": "Name", "type": "Type" },
+  "form": { "code": "Code", "name": "Name", "type": "Type" }
+}

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import PageMeta from "../../components/common/PageMeta";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import CrudPage from "../../components/crud/CrudPage";
@@ -6,6 +7,7 @@ import type { Role, CreateRoleRequest, UpdateRoleRequest } from "../../types/ent
 import RoleForm from "./RoleForm";
 
 export default function RolesListPage() {
+  const { t } = useTranslation(["roles", "common"]);
   const crud = useCrud<Role, CreateRoleRequest, UpdateRoleRequest>({
     basePath: "/api/Roles",
     getListAction: "GetRoles",
@@ -16,15 +18,15 @@ export default function RolesListPage() {
 
   return (
     <div>
-      <PageMeta title="Roller" description="Rol yonetimi" />
-      <PageBreadcrumb pageTitle="Roller" />
+      <PageMeta title={t("roles:title")} description={t("roles:description")} />
+      <PageBreadcrumb pageTitle={t("roles:title")} />
       <CrudPage
-        title="Roller"
+        title={t("roles:title")}
         crud={crud}
         columns={[
-          { header: "Ad", render: (r) => r.name },
-          { header: "Kod", render: (r) => r.code },
-          { header: "Durum", render: (r) => (r.status ? "Aktif" : "Pasif") },
+          { header: t("roles:columns.name"), render: (r) => r.name },
+          { header: t("roles:columns.code"), render: (r) => r.code },
+          { header: t("roles:columns.status"), render: (r) => (r.status ? t("common:active") : t("common:inactive")) },
         ]}
         renderForm={(props) => <RoleForm {...props} />}
       />

@@ -1,0 +1,17 @@
+{
+  "menu": "Menü",
+  "accounting": "Muhasebe",
+  "others": "Diğer",
+  "dashboard": "Panel",
+  "ecommerce": "Genel Bakış",
+  "userProfile": "Kullanıcı Profili",
+  "companies": "Şirketler",
+  "roles": "Roller",
+  "mainRoles": "Ana Roller",
+  "mainRoleRoleRelationships": "Ana Rol - Rol İlişkileri",
+  "mainRoleUserRelationships": "Ana Rol - Kullanıcı İlişkileri",
+  "uniformChartOfAccounts": "Tekdüzen Hesap Planı",
+  "authentication": "Kimlik Doğrulama",
+  "signIn": "Giriş Yap",
+  "signUp": "Kayıt Ol"
+}

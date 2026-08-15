@@ -1,0 +1,16 @@
+{
+  "cancel": "Vazgeç",
+  "save": "Kaydet",
+  "saving": "Kaydediliyor...",
+  "yes": "Evet",
+  "no": "Hayır",
+  "active": "Aktif",
+  "inactive": "Pasif",
+  "home": "Ana Sayfa",
+  "errors": {
+    "sessionExpired": "Oturum süresi doldu, lütfen tekrar giriş yapın.",
+    "sessionRefreshFailed": "Oturum yenilenemedi.",
+    "requestFailed": "İşlem başarısız oldu.",
+    "listFetchFailed": "Liste alınamadı."
+  }
+}

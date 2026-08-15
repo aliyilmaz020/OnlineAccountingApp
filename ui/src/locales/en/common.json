@@ -1,0 +1,16 @@
+{
+  "cancel": "Cancel",
+  "save": "Save",
+  "saving": "Saving...",
+  "yes": "Yes",
+  "no": "No",
+  "active": "Active",
+  "inactive": "Inactive",
+  "home": "Home",
+  "errors": {
+    "sessionExpired": "Your session has expired, please sign in again.",
+    "sessionRefreshFailed": "Could not refresh the session.",
+    "requestFailed": "The operation failed.",
+    "listFetchFailed": "Could not load the list."
+  }
+}

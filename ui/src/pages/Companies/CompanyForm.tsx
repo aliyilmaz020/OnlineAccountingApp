@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import Button from "../../components/ui/button/Button";
@@ -9,6 +10,7 @@ import type { Company, CreateCompanyRequest, UpdateCompanyRequest } from "../../
 type Props = CrudFormRenderProps<Company, CreateCompanyRequest, UpdateCompanyRequest>;
 
 export default function CompanyForm({ initial, onSubmit, onCancel, isSubmitting }: Props) {
+  const { t } = useTranslation(["companies", "common"]);
   const [name, setName] = useState(initial?.name ?? "");
   const [address, setAddress] = useState(initial?.address ?? "");
   const [identityNumber, setIdentityNumber] = useState(initial?.identityNumber ?? "");
@@ -41,56 +43,56 @@ export default function CompanyForm({ initial, onSubmit, onCancel, isSubmitting 
       {initial && (
         <Alert
           variant="warning"
-          title="Dikkat"
-          message="Sunucu bilgileri (Server/Database/User/Password) guvenlik nedeniyle geri gosterilmez. Bu alanlari bos birakirsaniz mevcut baglanti bilgileri silinir - degistirmek istemiyorsaniz ayni degerleri tekrar girin."
+          title={t("companies:form.serverInfoWarningTitle")}
+          message={t("companies:form.serverInfoWarning")}
         />
       )}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <Label>Sirket Adi</Label>
+          <Label>{t("companies:form.companyName")}</Label>
           <Input value={name} onChange={(e) => setName(e.target.value)} />
         </div>
         <div>
-          <Label>Adres</Label>
+          <Label>{t("companies:form.address")}</Label>
           <Input value={address} onChange={(e) => setAddress(e.target.value)} />
         </div>
         <div>
-          <Label>Vergi No / Kimlik No</Label>
+          <Label>{t("companies:form.identityNumber")}</Label>
           <Input value={identityNumber} onChange={(e) => setIdentityNumber(e.target.value)} />
         </div>
         <div>
-          <Label>Vergi Dairesi</Label>
+          <Label>{t("companies:form.taxDepartment")}</Label>
           <Input value={taxDepartment} onChange={(e) => setTaxDepartment(e.target.value)} />
         </div>
         <div>
-          <Label>Telefon</Label>
+          <Label>{t("companies:form.phoneNumber")}</Label>
           <Input value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
         </div>
         <div>
-          <Label>E-posta</Label>
+          <Label>{t("companies:form.email")}</Label>
           <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
         </div>
       </div>
 
       <div className="border-t border-gray-200 pt-4 dark:border-gray-800">
         <h5 className="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">
-          Veritabani Baglanti Bilgileri
+          {t("companies:form.dbSectionTitle")}
         </h5>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <Label>Sunucu Adi</Label>
+            <Label>{t("companies:form.serverName")}</Label>
             <Input value={serverName} onChange={(e) => setServerName(e.target.value)} />
           </div>
           <div>
-            <Label>Veritabani Adi</Label>
+            <Label>{t("companies:form.databaseName")}</Label>
             <Input value={databaseName} onChange={(e) => setDatabaseName(e.target.value)} />
           </div>
           <div>
-            <Label>Sunucu Kullanici Adi</Label>
+            <Label>{t("companies:form.serverUserId")}</Label>
             <Input value={serverUserId} onChange={(e) => setServerUserId(e.target.value)} />
           </div>
           <div>
-            <Label>Sunucu Sifresi</Label>
+            <Label>{t("companies:form.serverPassword")}</Label>
             <Input
               type="password"
               value={serverPassword}
@@ -102,9 +104,9 @@ export default function CompanyForm({ initial, onSubmit, onCancel, isSubmitting 
 
       <div className="flex justify-end gap-3 pt-2">
         <Button type="button" variant="outline" onClick={onCancel}>
-          Vazgec
+          {t("common:cancel")}
         </Button>
-        <Button type="submit" disabled={isSubmitting}>{isSubmitting ? "Kaydediliyor..." : "Kaydet"}</Button>
+        <Button type="submit" disabled={isSubmitting}>{isSubmitting ? t("common:saving") : t("common:save")}</Button>
       </div>
     </form>
   );

@@ -1,0 +1,17 @@
+{
+  "menu": "Menu",
+  "accounting": "Accounting",
+  "others": "Others",
+  "dashboard": "Dashboard",
+  "ecommerce": "Overview",
+  "userProfile": "User Profile",
+  "companies": "Companies",
+  "roles": "Roles",
+  "mainRoles": "Main Roles",
+  "mainRoleRoleRelationships": "Main Role - Role Relationships",
+  "mainRoleUserRelationships": "Main Role - User Relationships",
+  "uniformChartOfAccounts": "Uniform Chart of Accounts",
+  "authentication": "Authentication",
+  "signIn": "Sign In",
+  "signUp": "Sign Up"
+}

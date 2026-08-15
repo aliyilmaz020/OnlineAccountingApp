@@ -1,0 +1,20 @@
+{
+  "saveFailed": "Could not save.",
+  "updateFailed": "Could not update.",
+  "deleteConfirm": "Are you sure you want to delete this record?",
+  "deleteFailed": "Could not delete.",
+  "searchPlaceholder": "Search...",
+  "addNew": "Add New",
+  "errorTitle": "Error",
+  "actions": "Actions",
+  "loading": "Loading...",
+  "noRecords": "No records found.",
+  "edit": "Edit",
+  "delete": "Delete",
+  "totalCount": "Total {{count}} records",
+  "previous": "Previous",
+  "pageIndicator": "Page {{page}} / {{totalPages}}",
+  "next": "Next",
+  "newItemTitle": "New {{title}}",
+  "editItemTitle": "Edit {{title}}"
+}

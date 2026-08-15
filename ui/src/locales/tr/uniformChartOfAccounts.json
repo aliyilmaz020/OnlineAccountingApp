@@ -1,0 +1,6 @@
+{
+  "title": "Tekdüzen Hesap Planı",
+  "description": "Tekdüzen hesap planı yönetimi",
+  "columns": { "code": "Kod", "name": "Ad", "type": "Tip" },
+  "form": { "code": "Kod", "name": "Ad", "type": "Tip" }
+}

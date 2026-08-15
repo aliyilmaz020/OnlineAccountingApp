@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
@@ -10,6 +11,7 @@ import { useAuth } from "../../context/AuthContext";
 import { ApiError } from "../../lib/apiError";
 
 export default function SignInForm() {
+  const { t } = useTranslation("auth");
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -28,7 +30,7 @@ export default function SignInForm() {
       await login(email, password);
       navigate("/select-company");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Giriş yapılamadı.");
+      setError(err instanceof ApiError ? err.message : t("signIn.errorFallback"));
     } finally {
       setIsSubmitting(false);
     }
@@ -42,45 +44,45 @@ export default function SignInForm() {
           className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
         >
           <ChevronLeftIcon className="size-5" />
-          Back to dashboard
+          {t("backToDashboard")}
         </Link>
       </div>
       <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
         <div>
           <div className="mb-5 sm:mb-8">
             <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
-              Sign In
+              {t("signIn.heading")}
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Enter your email and password to sign in!
+              {t("signIn.subheading")}
             </p>
           </div>
           <div>
             {error && (
               <div className="mb-5">
-                <Alert variant="error" title="Giriş başarısız" message={error} />
+                <Alert variant="error" title={t("signIn.errorTitle")} message={error} />
               </div>
             )}
             <form onSubmit={handleSubmit}>
               <div className="space-y-6">
                 <div>
                   <Label>
-                    Email <span className="text-error-500">*</span>{" "}
+                    {t("signIn.email")} <span className="text-error-500">*</span>{" "}
                   </Label>
                   <Input
-                    placeholder="info@gmail.com"
+                    placeholder={t("signIn.emailPlaceholder")}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
                 <div>
                   <Label>
-                    Password <span className="text-error-500">*</span>{" "}
+                    {t("signIn.password")} <span className="text-error-500">*</span>{" "}
                   </Label>
                   <div className="relative">
                     <Input
                       type={showPassword ? "text" : "password"}
-                      placeholder="Enter your password"
+                      placeholder={t("signIn.passwordPlaceholder")}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                     />
@@ -100,13 +102,13 @@ export default function SignInForm() {
                   <div className="flex items-center gap-3">
                     <Checkbox checked={isChecked} onChange={setIsChecked} />
                     <span className="block font-normal text-gray-700 text-theme-sm dark:text-gray-400">
-                      Keep me logged in
+                      {t("signIn.keepLoggedIn")}
                     </span>
                   </div>
                 </div>
                 <div>
                   <Button type="submit" className="w-full" size="sm" disabled={isSubmitting}>
-                    {isSubmitting ? "Giriş yapılıyor..." : "Sign in"}
+                    {isSubmitting ? t("signIn.submitting") : t("signIn.submit")}
                   </Button>
                 </div>
               </div>
@@ -114,12 +116,12 @@ export default function SignInForm() {
 
             <div className="mt-5">
               <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
-                Don&apos;t have an account? {""}
+                {t("signIn.noAccount")} {""}
                 <Link
                   to="/signup"
                   className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
                 >
-                  Sign Up
+                  {t("signIn.signUpLink")}
                 </Link>
               </p>
             </div>

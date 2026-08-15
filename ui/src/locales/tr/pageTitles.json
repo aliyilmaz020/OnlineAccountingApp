@@ -1,0 +1,14 @@
+{
+  "dashboard": "OnlineAccountingApp | Panel",
+  "profile": "OnlineAccountingApp | Profil",
+  "companies": "OnlineAccountingApp | Şirketler",
+  "roles": "OnlineAccountingApp | Roller",
+  "mainRoles": "OnlineAccountingApp | Ana Roller",
+  "mainRoleRoleRelationships": "OnlineAccountingApp | Ana Rol - Rol İlişkileri",
+  "mainRoleUserRelationships": "OnlineAccountingApp | Ana Rol - Kullanıcı İlişkileri",
+  "uniformChartOfAccounts": "OnlineAccountingApp | Tekdüzen Hesap Planı",
+  "selectCompany": "OnlineAccountingApp | Şirket Seç",
+  "signIn": "OnlineAccountingApp | Giriş Yap",
+  "signUp": "OnlineAccountingApp | Kayıt Ol",
+  "notFound": "OnlineAccountingApp | Sayfa Bulunamadı"
+}

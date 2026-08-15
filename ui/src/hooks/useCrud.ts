@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { apiDelete, apiGet, apiPost, apiPut } from "../lib/apiClient";
 import { ApiError } from "../lib/apiError";
 import type { PagedResult } from "../types/api";
+import i18next from "../i18n/config";
 
 export interface CrudConfig {
   basePath: string;
@@ -40,7 +41,7 @@ export function useCrud<
       setTotalCount(result.totalCount);
       setTotalPages(result.totalPages);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Liste alınamadı.");
+      setError(err instanceof ApiError ? err.message : i18next.t("common:errors.listFetchFailed"));
     } finally {
       setIsLoading(false);
     }

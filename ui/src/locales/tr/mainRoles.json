@@ -1,0 +1,6 @@
+{
+  "title": "Ana Roller",
+  "description": "Ana rol yönetimi",
+  "columns": { "title": "Başlık", "company": "Şirket", "adminCanCreate": "Admin Oluşturabilir" },
+  "form": { "title": "Başlık", "company": "Şirket", "companyPlaceholder": "Şirket seçin", "adminCanCreate": "Admin tarafından oluşturulabilir" }
+}

@@ -1,0 +1,6 @@
+{
+  "title": "Roller",
+  "description": "Rol yönetimi",
+  "columns": { "name": "Ad", "code": "Kod", "status": "Durum" },
+  "form": { "roleName": "Rol Adı", "code": "Kod", "active": "Aktif" }
+}

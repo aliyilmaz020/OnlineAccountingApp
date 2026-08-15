@@ -1,0 +1,25 @@
+{
+  "title": "Companies",
+  "description": "Company management",
+  "columns": {
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "taxDepartment": "Tax Department"
+  },
+  "form": {
+    "serverInfoWarningTitle": "Warning",
+    "serverInfoWarning": "Server credentials (Server/Database/User/Password) are not shown back for security reasons. Leaving these fields blank deletes the existing connection info - re-enter the same values if you don't want to change them.",
+    "companyName": "Company Name",
+    "address": "Address",
+    "identityNumber": "Tax No / ID No",
+    "taxDepartment": "Tax Department",
+    "phoneNumber": "Phone",
+    "email": "Email",
+    "dbSectionTitle": "Database Connection Info",
+    "serverName": "Server Name",
+    "databaseName": "Database Name",
+    "serverUserId": "Server User Id",
+    "serverPassword": "Server Password"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "pageTitle": "Şirket Seç",
+  "pageDescription": "Çalışmak istediğiniz şirketi seçin",
+  "heading": "Şirket Seçin",
+  "subheading": "Devam etmek için bir şirket seçin veya yeni bir şirket oluşturun.",
+  "loading": "Yükleniyor...",
+  "empty": "Henüz bir şirketiniz yok.",
+  "createNew": "Yeni Şirket Oluştur",
+  "select": "Seç",
+  "createModalTitle": "Yeni Şirket",
+  "errorTitle": "Hata",
+  "createFailed": "Şirket oluşturulamadı."
+}
