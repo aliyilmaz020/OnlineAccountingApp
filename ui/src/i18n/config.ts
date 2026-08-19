@@ -23,6 +23,10 @@ import mainRoleUserRelationshipsTr from "../locales/tr/mainRoleUserRelationships
 import mainRoleUserRelationshipsEn from "../locales/en/mainRoleUserRelationships.json";
 import uniformChartOfAccountsTr from "../locales/tr/uniformChartOfAccounts.json";
 import uniformChartOfAccountsEn from "../locales/en/uniformChartOfAccounts.json";
+import usersTr from "../locales/tr/users.json";
+import usersEn from "../locales/en/users.json";
+import systemToolsTr from "../locales/tr/systemTools.json";
+import systemToolsEn from "../locales/en/systemTools.json";
 import selectCompanyTr from "../locales/tr/selectCompany.json";
 import selectCompanyEn from "../locales/en/selectCompany.json";
 import notFoundTr from "../locales/tr/notFound.json";
@@ -37,6 +41,8 @@ import notificationsTr from "../locales/tr/notifications.json";
 import notificationsEn from "../locales/en/notifications.json";
 import userMenuTr from "../locales/tr/userMenu.json";
 import userMenuEn from "../locales/en/userMenu.json";
+import accountSettingsTr from "../locales/tr/accountSettings.json";
+import accountSettingsEn from "../locales/en/accountSettings.json";
 
 const LANGUAGE_KEY = "language";
 const savedLanguage = (typeof window !== "undefined" && localStorage.getItem(LANGUAGE_KEY)) || "tr";
@@ -55,6 +61,8 @@ i18next.use(initReactI18next).init({
       mainRoleRoleRelationships: mainRoleRoleRelationshipsTr,
       mainRoleUserRelationships: mainRoleUserRelationshipsTr,
       uniformChartOfAccounts: uniformChartOfAccountsTr,
+      users: usersTr,
+      systemTools: systemToolsTr,
       selectCompany: selectCompanyTr,
       notFound: notFoundTr,
       pageTitles: pageTitlesTr,
@@ -62,6 +70,7 @@ i18next.use(initReactI18next).init({
       profile: profileTr,
       notifications: notificationsTr,
       userMenu: userMenuTr,
+      accountSettings: accountSettingsTr,
     },
     en: {
       common: commonEn,
@@ -75,6 +84,8 @@ i18next.use(initReactI18next).init({
       mainRoleRoleRelationships: mainRoleRoleRelationshipsEn,
       mainRoleUserRelationships: mainRoleUserRelationshipsEn,
       uniformChartOfAccounts: uniformChartOfAccountsEn,
+      users: usersEn,
+      systemTools: systemToolsEn,
       selectCompany: selectCompanyEn,
       notFound: notFoundEn,
       pageTitles: pageTitlesEn,
@@ -82,6 +93,7 @@ i18next.use(initReactI18next).init({
       profile: profileEn,
       notifications: notificationsEn,
       userMenu: userMenuEn,
+      accountSettings: accountSettingsEn,
     },
   },
   lng: savedLanguage,

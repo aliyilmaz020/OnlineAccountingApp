@@ -1,10 +1,10 @@
 {
   "title": "Main Role - User Relationships",
   "description": "Main role and user relationship management",
-  "columns": { "userId": "User Id", "mainRoleId": "Main Role Id", "companyId": "Company Id" },
+  "columns": { "userId": "User", "mainRoleId": "Main Role", "companyId": "Company" },
   "form": {
-    "userIdLabel": "User Id",
-    "userIdHint": "There is no user-listing endpoint for this screen; enter the user's Id manually.",
+    "userLabel": "User",
+    "userPlaceholder": "Select user",
     "mainRoleLabel": "Main Role",
     "mainRolePlaceholder": "Select main role",
     "companyLabel": "Company",

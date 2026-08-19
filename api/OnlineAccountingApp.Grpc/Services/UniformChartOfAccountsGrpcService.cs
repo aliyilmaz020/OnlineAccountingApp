@@ -6,6 +6,7 @@ using OnlineAccountingApp.Application.Features.CompanyFeatures.UniformChartOfAcc
 using OnlineAccountingApp.Application.Features.CompanyFeatures.UniformChartOfAccountFeature.GetById;
 using OnlineAccountingApp.Application.Features.CompanyFeatures.UniformChartOfAccountFeature.GetList;
 using OnlineAccountingApp.Application.Features.CompanyFeatures.UniformChartOfAccountFeature.Update;
+using OnlineAccountingApp.Domain.Roles;
 using OnlineAccountingApp.Framework.Services;
 using OnlineAccountingApp.Grpc.Protos;
 
@@ -15,6 +16,7 @@ namespace OnlineAccountingApp.Grpc.Services;
 public sealed class UniformChartOfAccountsGrpcService(IMediator mediator)
     : UniformChartOfAccounts.UniformChartOfAccountsBase
 {
+    [Authorize(Policy = RoleList.UCAFCreateCode)]
     public override async Task<UniformChartOfAccountItem> CreateUniformChartOfAccount(
         CreateUniformChartOfAccountRequest request, ServerCallContext context)
     {
@@ -28,6 +30,7 @@ public sealed class UniformChartOfAccountsGrpcService(IMediator mediator)
         return ToItem(result);
     }
 
+    [Authorize(Policy = RoleList.UCAFReadCode)]
     public override async Task<GetUniformChartOfAccountsResponse> GetUniformChartOfAccounts(
         GetUniformChartOfAccountsRequest request, ServerCallContext context)
     {
@@ -49,6 +52,7 @@ public sealed class UniformChartOfAccountsGrpcService(IMediator mediator)
         return response;
     }
 
+    [Authorize(Policy = RoleList.UCAFReadCode)]
     public override async Task<UniformChartOfAccountItem> GetUniformChartOfAccountById(
         GetByIdRequest request, ServerCallContext context)
     {
@@ -58,6 +62,7 @@ public sealed class UniformChartOfAccountsGrpcService(IMediator mediator)
         return ToItem(result);
     }
 
+    [Authorize(Policy = RoleList.UCAFUpdateCode)]
     public override async Task<UniformChartOfAccountItem> UpdateUniformChartOfAccount(
         UpdateUniformChartOfAccountRequest request, ServerCallContext context)
     {
@@ -72,6 +77,7 @@ public sealed class UniformChartOfAccountsGrpcService(IMediator mediator)
         return ToItem(result);
     }
 
+    [Authorize(Policy = RoleList.UCAFDeleteCode)]
     public override async Task<DeleteResponse> DeleteUniformChartOfAccount(
         GetByIdRequest request, ServerCallContext context)
     {

@@ -1,0 +1,31 @@
+{
+  "title": "Sistem Araçları",
+  "description": "Bakım ve toplu işlemler",
+  "run": "Çalıştır",
+  "running": "Çalışıyor...",
+  "migrateDb": {
+    "title": "Şirket Veritabanlarını Güncelle",
+    "description": "Tüm şirketlerin veritabanlarına bekleyen migration'ları uygular.",
+    "success": "Tüm şirket veritabanları güncellendi."
+  },
+  "createAllRoles": {
+    "title": "Tüm Rolleri Oluştur",
+    "description": "Sistemde tanımlı standart rollerden eksik olanları oluşturur.",
+    "successNone": "Eklenecek yeni rol yok, hepsi zaten mevcut.",
+    "successSome": "{{count}} yeni rol oluşturuldu: {{names}}"
+  },
+  "seedSampleData": {
+    "title": "Örnek Veri Oluştur",
+    "description": "Geliştirme/demo için örnek şirket, kullanıcı ve rol verisi oluşturur.",
+    "success": "Örnek veri oluşturma tamamlandı.",
+    "results": {
+      "permissionRolesCreated": "Oluşturulan yetki rolü",
+      "companiesCreated": "Oluşturulan şirket",
+      "usersCreated": "Oluşturulan kullanıcı",
+      "userCompanyLinksCreated": "Oluşturulan kullanıcı-şirket bağlantısı",
+      "mainRolesCreated": "Oluşturulan ana rol",
+      "mainRoleRoleLinksCreated": "Oluşturulan ana rol-rol bağlantısı",
+      "mainRoleUserLinksCreated": "Oluşturulan ana rol-kullanıcı bağlantısı"
+    }
+  }
+}

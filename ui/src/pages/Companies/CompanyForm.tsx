@@ -7,9 +7,12 @@ import Alert from "../../components/ui/alert/Alert";
 import type { CrudFormRenderProps } from "../../components/crud/CrudPage";
 import type { Company, CreateCompanyRequest, UpdateCompanyRequest } from "../../types/entities";
 
-type Props = CrudFormRenderProps<Company, CreateCompanyRequest, UpdateCompanyRequest>;
+type Props = CrudFormRenderProps<Company, CreateCompanyRequest, UpdateCompanyRequest> & {
+  /** DB connection fields are system-admin-only; a company's own "Yönetici" can edit everything else. */
+  isAdmin: boolean;
+};
 
-export default function CompanyForm({ initial, onSubmit, onCancel, isSubmitting }: Props) {
+export default function CompanyForm({ initial, onSubmit, onCancel, isSubmitting, isAdmin }: Props) {
   const { t } = useTranslation(["companies", "common"]);
   const [name, setName] = useState(initial?.name ?? "");
   const [address, setAddress] = useState(initial?.address ?? "");
@@ -40,7 +43,7 @@ export default function CompanyForm({ initial, onSubmit, onCancel, isSubmitting 
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {initial && (
+      {initial && isAdmin && (
         <Alert
           variant="warning"
           title={t("companies:form.serverInfoWarningTitle")}
@@ -74,33 +77,35 @@ export default function CompanyForm({ initial, onSubmit, onCancel, isSubmitting 
         </div>
       </div>
 
-      <div className="border-t border-gray-200 pt-4 dark:border-gray-800">
-        <h5 className="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">
-          {t("companies:form.dbSectionTitle")}
-        </h5>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <Label>{t("companies:form.serverName")}</Label>
-            <Input value={serverName} onChange={(e) => setServerName(e.target.value)} />
-          </div>
-          <div>
-            <Label>{t("companies:form.databaseName")}</Label>
-            <Input value={databaseName} onChange={(e) => setDatabaseName(e.target.value)} />
-          </div>
-          <div>
-            <Label>{t("companies:form.serverUserId")}</Label>
-            <Input value={serverUserId} onChange={(e) => setServerUserId(e.target.value)} />
-          </div>
-          <div>
-            <Label>{t("companies:form.serverPassword")}</Label>
-            <Input
-              type="password"
-              value={serverPassword}
-              onChange={(e) => setServerPassword(e.target.value)}
-            />
+      {isAdmin && (
+        <div className="border-t border-gray-200 pt-4 dark:border-gray-800">
+          <h5 className="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">
+            {t("companies:form.dbSectionTitle")}
+          </h5>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <Label>{t("companies:form.serverName")}</Label>
+              <Input value={serverName} onChange={(e) => setServerName(e.target.value)} />
+            </div>
+            <div>
+              <Label>{t("companies:form.databaseName")}</Label>
+              <Input value={databaseName} onChange={(e) => setDatabaseName(e.target.value)} />
+            </div>
+            <div>
+              <Label>{t("companies:form.serverUserId")}</Label>
+              <Input value={serverUserId} onChange={(e) => setServerUserId(e.target.value)} />
+            </div>
+            <div>
+              <Label>{t("companies:form.serverPassword")}</Label>
+              <Input
+                type="password"
+                value={serverPassword}
+                onChange={(e) => setServerPassword(e.target.value)}
+              />
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <div className="flex justify-end gap-3 pt-2">
         <Button type="button" variant="outline" onClick={onCancel}>

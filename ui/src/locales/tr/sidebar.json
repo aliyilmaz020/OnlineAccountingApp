@@ -6,11 +6,13 @@
   "ecommerce": "Genel Bakış",
   "userProfile": "Kullanıcı Profili",
   "companies": "Şirketler",
+  "users": "Kullanıcılar",
   "roles": "Roller",
   "mainRoles": "Ana Roller",
   "mainRoleRoleRelationships": "Ana Rol - Rol İlişkileri",
   "mainRoleUserRelationships": "Ana Rol - Kullanıcı İlişkileri",
   "uniformChartOfAccounts": "Tekdüzen Hesap Planı",
+  "systemTools": "Sistem Araçları",
   "authentication": "Kimlik Doğrulama",
   "signIn": "Giriş Yap",
   "signUp": "Kayıt Ol"

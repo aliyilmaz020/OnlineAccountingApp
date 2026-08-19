@@ -4,6 +4,7 @@ using OnlineAccountingApp.Application.Services.CompanyServices;
 using OnlineAccountingApp.Application.Tests.TestHelpers;
 using OnlineAccountingApp.Domain.AppEntities;
 using OnlineAccountingApp.Domain.Entities;
+using OnlineAccountingApp.Domain.Roles;
 using OnlineAccountingApp.Framework.Services;
 using System.Linq.Expressions;
 
@@ -111,5 +112,35 @@ public class GetCompaniesQueryHandlerTests
         Assert.True(compiledPredicate(BuildCompany("1", "Acme Holdings")));
         Assert.False(compiledPredicate(BuildCompany("1", "Globex")));
         Assert.False(compiledPredicate(BuildCompany("2", "Acme Holdings")));
+    }
+
+    [Fact]
+    public async Task Handle_ShouldIgnoreMembership_WhenCallerIsSystemAdmin()
+    {
+        (Mock<IUnitOfWork> unitOfWork, Mock<IRepository<Company>> repository, Mock<ICompanyContext> companyContext) = BuildHandlerDeps();
+        companyContext.Setup(c => c.IsInRole(RoleList.SystemAdmin)).Returns(true);
+
+        Expression<Func<Company, bool>>? capturedPredicate = null;
+        repository.Setup(r => r.GetPagedAsync(
+                It.IsAny<int>(),
+                It.IsAny<int>(),
+                It.IsAny<Expression<Func<Company, bool>>?>(),
+                It.IsAny<Expression<Func<Company, object>>[]?>(),
+                It.IsAny<bool>(),
+                It.IsAny<CancellationToken>()))
+            .Callback<int, int, Expression<Func<Company, bool>>?, Expression<Func<Company, object>>[]?, bool, CancellationToken>(
+                (_, _, predicate, _, _, _) => capturedPredicate = predicate)
+            .ReturnsAsync(new PagedResult<Company> { Items = [], TotalCount = 0, PageNumber = 1, PageSize = 20 });
+
+        GetCompaniesQueryHandler handler = new(unitOfWork.Object, companyContext.Object);
+        GetCompaniesQuery query = new() { PageNumber = 1, PageSize = 20 };
+
+        await handler.Handle(query, CancellationToken.None);
+
+        Assert.NotNull(capturedPredicate);
+        Func<Company, bool> compiledPredicate = capturedPredicate!.Compile();
+        // BuildHandlerDeps() with no member ids means an ordinary caller belongs to nothing;
+        // an admin should still see companies they don't personally belong to.
+        Assert.True(compiledPredicate(BuildCompany("not-a-member-company", "Someone Else's Co")));
     }
 }

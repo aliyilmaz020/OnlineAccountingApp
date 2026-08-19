@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using OnlineAccountingApp.Domain.Exceptions;
+using OnlineAccountingApp.Domain.Roles;
 using OnlineAccountingApp.Infrastructure.Options;
+using OnlineAccountingApp.WebApi.Authorization;
 using OnlineAccountingApp.WebApi.Models;
 using System.Text;
 
@@ -46,22 +49,33 @@ public static partial class ApiConfig
                     OnChallenge = async context =>
                     {
                         context.HandleResponse();
+                        string? language = context.Request.Headers.AcceptLanguage.FirstOrDefault();
                         await WriteApiResponseAsync(
                             context.Response,
                             StatusCodes.Status401Unauthorized,
                             AppErrorCodes.Auth.InvalidCredentials,
-                            "Authentication is required to access this resource.");
+                            ErrorMessageTranslator.Translate("Authentication is required to access this resource.", language));
                     },
                     OnForbidden = async context =>
                     {
+                        string? language = context.Request.Headers.AcceptLanguage.FirstOrDefault();
                         await WriteApiResponseAsync(
                             context.Response,
                             StatusCodes.Status403Forbidden,
                             AppErrorCodes.Auth.CompanyAccessDenied,
-                            "You do not have permission to access this resource.");
+                            ErrorMessageTranslator.Translate("You do not have permission to access this resource.", language));
                     }
                 };
             });
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy(RoleList.UCAFCreateCode, policy => policy.Requirements.Add(new PermissionRequirement(RoleList.UCAFCreateCode)));
+                options.AddPolicy(RoleList.UCAFReadCode, policy => policy.Requirements.Add(new PermissionRequirement(RoleList.UCAFReadCode)));
+                options.AddPolicy(RoleList.UCAFUpdateCode, policy => policy.Requirements.Add(new PermissionRequirement(RoleList.UCAFUpdateCode)));
+                options.AddPolicy(RoleList.UCAFDeleteCode, policy => policy.Requirements.Add(new PermissionRequirement(RoleList.UCAFDeleteCode)));
+            });
+            services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
         }
     }
 

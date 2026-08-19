@@ -8,13 +8,19 @@ public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logge
 {
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
+        string? language = httpContext.Request.Headers.AcceptLanguage.FirstOrDefault();
+
         var (statusCode, response) = exception switch
         {
             ValidationException validationException =>
-                (validationException.HttpStatusCode, ApiResponse.Fail(validationException.ErrorCode, validationException.Message, validationException.Errors)),
+                (validationException.HttpStatusCode, ApiResponse.Fail(
+                    validationException.ErrorCode,
+                    ErrorMessageTranslator.Translate(validationException.Message, language),
+                    TranslateErrors(validationException.Errors, language))),
             BusinessException businessException =>
-                (businessException.HttpStatusCode, ApiResponse.Fail(businessException.ErrorCode, businessException.Message)),
-            _ => (StatusCodes.Status500InternalServerError, ApiResponse.Fail(null, "An unexpected error occurred."))
+                (businessException.HttpStatusCode, ApiResponse.Fail(
+                    businessException.ErrorCode, ErrorMessageTranslator.Translate(businessException.Message, language))),
+            _ => (StatusCodes.Status500InternalServerError, ApiResponse.Fail(null, ErrorMessageTranslator.Translate("An unexpected error occurred.", language)))
         };
 
         if (statusCode == StatusCodes.Status500InternalServerError)
@@ -25,5 +31,12 @@ public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logge
         httpContext.Response.StatusCode = statusCode;
         await httpContext.Response.WriteAsJsonAsync(response, cancellationToken);
         return true;
+    }
+
+    private static IReadOnlyDictionary<string, string[]>? TranslateErrors(IReadOnlyDictionary<string, string[]> errors, string? language)
+    {
+        return errors.ToDictionary(
+            entry => entry.Key,
+            entry => entry.Value.Select(message => ErrorMessageTranslator.Translate(message, language)).ToArray());
     }
 }

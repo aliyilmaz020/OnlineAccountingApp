@@ -1,0 +1,31 @@
+{
+  "title": "System Tools",
+  "description": "Maintenance and bulk operations",
+  "run": "Run",
+  "running": "Running...",
+  "migrateDb": {
+    "title": "Migrate Company Databases",
+    "description": "Applies pending migrations to every company's database.",
+    "success": "All company databases were migrated."
+  },
+  "createAllRoles": {
+    "title": "Create All Roles",
+    "description": "Creates any missing standard roles defined in the system.",
+    "successNone": "No new roles to add, all already exist.",
+    "successSome": "{{count}} new role(s) created: {{names}}"
+  },
+  "seedSampleData": {
+    "title": "Seed Sample Data",
+    "description": "Creates sample companies, users and roles for development/demo.",
+    "success": "Sample data seeding completed.",
+    "results": {
+      "permissionRolesCreated": "Permission roles created",
+      "companiesCreated": "Companies created",
+      "usersCreated": "Users created",
+      "userCompanyLinksCreated": "User-company links created",
+      "mainRolesCreated": "Main roles created",
+      "mainRoleRoleLinksCreated": "Main role-role links created",
+      "mainRoleUserLinksCreated": "Main role-user links created"
+    }
+  }
+}

@@ -1,27 +1,11 @@
 {
-  "customers": "Customers",
-  "orders": "Orders",
-  "monthlySales": "Monthly Sales",
-  "monthlyTarget": "Monthly Target",
-  "targetSubtitle": "Target you've set for each month",
-  "viewMore": "View More",
-  "delete": "Delete",
-  "salesSeries": "Sales",
-  "revenueSeries": "Revenue",
-  "targetMessage": "You earn $3287 today, it's higher than last month. Keep up your good work!",
-  "target": "Target",
-  "revenue": "Revenue",
-  "today": "Today",
-  "progress": "Progress",
-  "statistics": "Statistics",
-  "selectDateRange": "Select date range",
-  "recentOrders": "Recent Orders",
-  "filter": "Filter",
-  "seeAll": "See all",
-  "columns": { "products": "Products", "category": "Category", "price": "Price", "status": "Status" },
-  "status": { "delivered": "Delivered", "pending": "Pending", "canceled": "Canceled" },
-  "customersDemographic": "Customers Demographic",
-  "demographicSubtitle": "Number of customer based on country",
-  "pageDescription": "This is the Ecommerce Dashboard page",
-  "months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+  "pageDescription": "Overview of companies, users, roles and chart of accounts",
+  "stats": {
+    "companies": "Companies",
+    "users": "Users",
+    "roles": "Roles",
+    "mainRoles": "Main Roles",
+    "uniformChartOfAccounts": "Uniform Chart of Accounts",
+    "selectCompanyHint": "Select a company"
+  }
 }

@@ -1,10 +1,10 @@
 {
   "title": "Ana Rol - Kullanıcı İlişkileri",
   "description": "Ana rol ve kullanıcı ilişki yönetimi",
-  "columns": { "userId": "Kullanıcı Id", "mainRoleId": "Ana Rol Id", "companyId": "Şirket Id" },
+  "columns": { "userId": "Kullanıcı", "mainRoleId": "Ana Rol", "companyId": "Şirket" },
   "form": {
-    "userIdLabel": "Kullanıcı Id",
-    "userIdHint": "Bu ekran için kullanıcı listeleme endpoint'i bulunmuyor; kullanıcının Id'sini manuel girin.",
+    "userLabel": "Kullanıcı",
+    "userPlaceholder": "Kullanıcı seçin",
     "mainRoleLabel": "Ana Rol",
     "mainRolePlaceholder": "Ana rol seçin",
     "companyLabel": "Şirket",

@@ -1,0 +1,12 @@
+{
+  "title": "Users",
+  "description": "User list and role management",
+  "columns": { "userName": "User Name", "email": "Email", "status": "Status" },
+  "manageRoles": "Manage Roles",
+  "modal": {
+    "title": "Manage Roles - {{userName}}",
+    "noRoles": "No roles defined.",
+    "loading": "Loading...",
+    "saveFailed": "Could not update roles."
+  }
+}

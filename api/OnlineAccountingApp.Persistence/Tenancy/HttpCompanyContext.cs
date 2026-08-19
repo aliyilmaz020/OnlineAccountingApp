@@ -32,4 +32,6 @@ public sealed class HttpCompanyContext(IHttpContextAccessor httpContextAccessor)
             return string.IsNullOrWhiteSpace(userId) ? null : userId;
         }
     }
+
+    public bool IsInRole(string roleName) => httpContextAccessor.HttpContext?.User.IsInRole(roleName) ?? false;
 }

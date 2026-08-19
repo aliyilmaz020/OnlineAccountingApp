@@ -6,11 +6,13 @@
   "ecommerce": "Overview",
   "userProfile": "User Profile",
   "companies": "Companies",
+  "users": "Users",
   "roles": "Roles",
   "mainRoles": "Main Roles",
   "mainRoleRoleRelationships": "Main Role - Role Relationships",
   "mainRoleUserRelationships": "Main Role - User Relationships",
   "uniformChartOfAccounts": "Uniform Chart of Accounts",
+  "systemTools": "System Tools",
   "authentication": "Authentication",
   "signIn": "Sign In",
   "signUp": "Sign Up"

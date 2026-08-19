@@ -86,6 +86,39 @@ export interface CreateMainRoleAndUserRelationshipRequest {
 
 export type UpdateMainRoleAndUserRelationshipRequest = CreateMainRoleAndUserRelationshipRequest;
 
+export interface UserListItem {
+  id: string;
+  userName: string | null;
+  email: string | null;
+  status: boolean;
+  createDate: string;
+  editDate: string | null;
+}
+
+export interface MyProfile {
+  id: string;
+  firstName: string | null;
+  lastName: string | null;
+  userName: string | null;
+  email: string | null;
+  phoneNumber: string | null;
+  isAdmin: boolean;
+}
+
+export interface UpdateMyProfileRequest {
+  userName: string;
+  email: string;
+  phoneNumber?: string;
+  firstName?: string;
+  lastName?: string;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
+}
+
 export interface UniformChartOfAccount {
   id: string;
   code: string;
@@ -100,3 +133,14 @@ export interface CreateUniformChartOfAccountRequest {
 }
 
 export type UpdateUniformChartOfAccountRequest = CreateUniformChartOfAccountRequest;
+
+export interface SeedSampleDataResult {
+  permissionRolesCreated: number;
+  companiesCreated: number;
+  usersCreated: number;
+  userCompanyLinksCreated: number;
+  mainRolesCreated: number;
+  mainRoleRoleLinksCreated: number;
+  mainRoleRoleLinksRemoved: number;
+  mainRoleUserLinksCreated: number;
+}

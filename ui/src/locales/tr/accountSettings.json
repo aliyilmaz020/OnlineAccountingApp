@@ -1,0 +1,11 @@
+{
+  "pageHeading": "Hesap Ayarları",
+  "pageDescription": "Hesap güvenlik ayarlarınızı yönetin",
+  "changePasswordTitle": "Şifre Değiştir",
+  "currentPassword": "Mevcut Şifre",
+  "newPassword": "Yeni Şifre",
+  "confirmNewPassword": "Yeni Şifre (Tekrar)",
+  "changePassword": "Şifreyi Değiştir",
+  "success": "Şifreniz başarıyla değiştirildi.",
+  "failed": "Şifre değiştirilemedi."
+}

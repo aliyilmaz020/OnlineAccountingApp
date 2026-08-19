@@ -58,7 +58,7 @@ async function doRefresh(): Promise<string> {
 
   const res = await fetch(`${BASE_URL}/api/Auth/RefreshToken`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "Accept-Language": i18next.language },
     body: JSON.stringify({ refreshToken }),
   });
   const body: ApiResponse<AuthResponse> = await res.json();
@@ -100,7 +100,10 @@ interface RequestOptions {
 }
 
 async function request<T>(path: string, options: RequestOptions, isRetry = false): Promise<T> {
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    "Accept-Language": i18next.language,
+  };
 
   const accessToken = getAccessToken();
   if (accessToken) {
@@ -152,6 +155,6 @@ export function apiPut<T>(path: string, body?: unknown): Promise<T> {
   return request<T>(path, { method: "PUT", body });
 }
 
-export function apiDelete<T>(path: string): Promise<T> {
-  return request<T>(path, { method: "DELETE" });
+export function apiDelete<T>(path: string, body?: unknown): Promise<T> {
+  return request<T>(path, { method: "DELETE", body });
 }

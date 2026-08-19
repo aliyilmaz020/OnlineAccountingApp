@@ -1,0 +1,11 @@
+{
+  "pageHeading": "Account Settings",
+  "pageDescription": "Manage your account security settings",
+  "changePasswordTitle": "Change Password",
+  "currentPassword": "Current Password",
+  "newPassword": "New Password",
+  "confirmNewPassword": "Confirm New Password",
+  "changePassword": "Change Password",
+  "success": "Your password has been changed successfully.",
+  "failed": "Could not change the password."
+}

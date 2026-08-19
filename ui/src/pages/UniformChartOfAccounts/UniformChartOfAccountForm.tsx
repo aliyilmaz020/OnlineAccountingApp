@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import Button from "../../components/ui/button/Button";
@@ -16,6 +17,7 @@ type Props = CrudFormRenderProps<
 >;
 
 export default function UniformChartOfAccountForm({ initial, onSubmit, onCancel, isSubmitting }: Props) {
+  const { t } = useTranslation(["uniformChartOfAccounts", "common"]);
   const [code, setCode] = useState(initial?.code ?? "");
   const [name, setName] = useState(initial?.name ?? "");
   const [type, setType] = useState(initial?.type ?? "");
@@ -28,23 +30,23 @@ export default function UniformChartOfAccountForm({ initial, onSubmit, onCancel,
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <Label>Kod</Label>
+        <Label>{t("uniformChartOfAccounts:form.code")}</Label>
         <Input value={code} onChange={(e) => setCode(e.target.value)} />
       </div>
       <div>
-        <Label>Ad</Label>
+        <Label>{t("uniformChartOfAccounts:form.name")}</Label>
         <Input value={name} onChange={(e) => setName(e.target.value)} />
       </div>
       <div>
-        <Label>Tip</Label>
+        <Label>{t("uniformChartOfAccounts:form.type")}</Label>
         <Input value={type} onChange={(e) => setType(e.target.value)} />
       </div>
       <div className="flex justify-end gap-3 pt-2">
         <Button type="button" variant="outline" onClick={onCancel}>
-          Vazgec
+          {t("common:cancel")}
         </Button>
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Kaydediliyor..." : "Kaydet"}
+          {isSubmitting ? t("common:saving") : t("common:save")}
         </Button>
       </div>
     </form>

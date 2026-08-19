@@ -27,12 +27,15 @@ interface CrudPageProps<TListItem extends { id: string }, TCreateReq, TUpdateReq
   crud: ReturnType<typeof useCrud<TListItem, TCreateReq, TUpdateReq>>;
   columns: CrudColumn<TListItem>[];
   renderForm: (props: CrudFormRenderProps<TListItem, TCreateReq, TUpdateReq>) => ReactNode;
+  canCreate?: boolean;
+  canEdit?: boolean;
+  canDelete?: boolean;
 }
 
 export default function CrudPage<TListItem extends { id: string }, TCreateReq, TUpdateReq>(
   props: CrudPageProps<TListItem, TCreateReq, TUpdateReq>,
 ) {
-  const { title, crud, columns, renderForm } = props;
+  const { title, crud, columns, renderForm, canCreate = true, canEdit = true, canDelete = true } = props;
   const { t } = useTranslation("crud");
   const createModal = useModal();
   const [editingItem, setEditingItem] = useState<TListItem | null>(null);
@@ -86,15 +89,17 @@ export default function CrudPage<TListItem extends { id: string }, TCreateReq, T
             value={crud.searchTerm}
             onChange={(e) => crud.setSearchTerm(e.target.value)}
           />
-          <Button
-            size="sm"
-            onClick={() => {
-              setFormError(null);
-              createModal.openModal();
-            }}
-          >
-            {t("addNew")}
-          </Button>
+          {canCreate && (
+            <Button
+              size="sm"
+              onClick={() => {
+                setFormError(null);
+                createModal.openModal();
+              }}
+            >
+              {t("addNew")}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -148,21 +153,25 @@ export default function CrudPage<TListItem extends { id: string }, TCreateReq, T
                   ))}
                   <TableCell className="px-4 py-3 text-sm">
                     <div className="flex items-center gap-3">
-                      <button
-                        className="text-brand-500 hover:text-brand-600"
-                        onClick={() => {
-                          setFormError(null);
-                          setEditingItem(item);
-                        }}
-                      >
-                        {t("edit")}
-                      </button>
-                      <button
-                        className="text-error-500 hover:text-error-600"
-                        onClick={() => handleDelete(item)}
-                      >
-                        {t("delete")}
-                      </button>
+                      {canEdit && (
+                        <button
+                          className="text-brand-500 hover:text-brand-600"
+                          onClick={() => {
+                            setFormError(null);
+                            setEditingItem(item);
+                          }}
+                        >
+                          {t("edit")}
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button
+                          className="text-error-500 hover:text-error-600"
+                          onClick={() => handleDelete(item)}
+                        >
+                          {t("delete")}
+                        </button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

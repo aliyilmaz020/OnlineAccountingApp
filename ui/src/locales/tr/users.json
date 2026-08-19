@@ -1,0 +1,12 @@
+{
+  "title": "Kullanıcılar",
+  "description": "Kullanıcı listesi ve rol yönetimi",
+  "columns": { "userName": "Kullanıcı Adı", "email": "E-posta", "status": "Durum" },
+  "manageRoles": "Rolleri Yönet",
+  "modal": {
+    "title": "Rol Yönetimi - {{userName}}",
+    "noRoles": "Tanımlı rol bulunamadı.",
+    "loading": "Yükleniyor...",
+    "saveFailed": "Roller güncellenemedi."
+  }
+}

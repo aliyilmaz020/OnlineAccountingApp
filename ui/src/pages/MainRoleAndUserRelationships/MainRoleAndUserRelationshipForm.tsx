@@ -1,6 +1,6 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import Label from "../../components/form/Label";
-import Input from "../../components/form/input/InputField";
 import Select from "../../components/form/Select";
 import Button from "../../components/ui/button/Button";
 import { useLookupOptions } from "../../hooks/useLookupOptions";
@@ -11,6 +11,7 @@ import type {
   CreateMainRoleAndUserRelationshipRequest,
   UpdateMainRoleAndUserRelationshipRequest,
   MainRole,
+  UserListItem,
 } from "../../types/entities";
 
 type Props = CrudFormRenderProps<
@@ -20,7 +21,13 @@ type Props = CrudFormRenderProps<
 >;
 
 export default function MainRoleAndUserRelationshipForm({ initial, onSubmit, onCancel, isSubmitting }: Props) {
+  const { t } = useTranslation(["mainRoleUserRelationships", "common"]);
   const { companies } = useCompany();
+  const { options: userOptions } = useLookupOptions<UserListItem>(
+    "/api/Users",
+    "GetUsers",
+    (u) => u.userName ?? u.email ?? u.id,
+  );
   const { options: mainRoleOptions } = useLookupOptions<MainRole>("/api/MainRoles", "GetMainRoles", (r) => r.title);
 
   const [userId, setUserId] = useState(initial?.userId ?? "");
@@ -35,37 +42,38 @@ export default function MainRoleAndUserRelationshipForm({ initial, onSubmit, onC
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <Label>Kullanici Id</Label>
-        <Input
-          value={userId}
-          onChange={(e) => setUserId(e.target.value)}
-          hint="Bu ekran icin kullanici listeleme endpoint'i bulunmuyor; kullanicinin Id'sini manuel girin."
+        <Label>{t("mainRoleUserRelationships:form.userLabel")}</Label>
+        <Select
+          options={userOptions}
+          defaultValue={userId}
+          onChange={setUserId}
+          placeholder={t("mainRoleUserRelationships:form.userPlaceholder")}
         />
       </div>
       <div>
-        <Label>Ana Rol</Label>
+        <Label>{t("mainRoleUserRelationships:form.mainRoleLabel")}</Label>
         <Select
           options={mainRoleOptions}
           defaultValue={mainRoleId}
           onChange={setMainRoleId}
-          placeholder="Ana rol secin"
+          placeholder={t("mainRoleUserRelationships:form.mainRolePlaceholder")}
         />
       </div>
       <div>
-        <Label>Sirket</Label>
+        <Label>{t("mainRoleUserRelationships:form.companyLabel")}</Label>
         <Select
           options={companies.map((c) => ({ value: c.id, label: c.name }))}
           defaultValue={companyId}
           onChange={setCompanyId}
-          placeholder="Sirket secin"
+          placeholder={t("mainRoleUserRelationships:form.companyPlaceholder")}
         />
       </div>
       <div className="flex justify-end gap-3 pt-2">
         <Button type="button" variant="outline" onClick={onCancel}>
-          Vazgec
+          {t("common:cancel")}
         </Button>
         <Button type="submit" disabled={isSubmitting || !userId || !mainRoleId || !companyId}>
-          {isSubmitting ? "Kaydediliyor..." : "Kaydet"}
+          {isSubmitting ? t("common:saving") : t("common:save")}
         </Button>
       </div>
     </form>

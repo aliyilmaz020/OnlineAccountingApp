@@ -118,18 +118,46 @@ public sealed class SeedService(AppDbContext context, UserManager<AppUser> userM
         SeedSampleDataResultDto result,
         CancellationToken cancellationToken)
     {
-        (string Title, bool IsAdmin, AppUser User)[] mainRoleSpecs =
+        // "Yönetici" gets full UCAF control plus Company.Update (non-DB company fields only -
+        // UpdateCompanyCommandHandler strips the DB connection fields for non-admin callers, and
+        // Company.Delete/system-admin-only Create stay out of reach). "Muhasebeci" stays
+        // read-only, so the two seeded users demonstrate permission enforcement out of the box
+        // instead of every MainRole silently getting every permission role.
+        (string Title, bool IsAdmin, AppUser User, string[] PermissionCodes)[] mainRoleSpecs =
         [
-            ("Yönetici", true, users[0]),
-            ("Muhasebeci", false, users[1])
+            ("Yönetici", true, users[0], [RoleList.UCAFCreateCode, RoleList.UCAFReadCode, RoleList.UCAFUpdateCode, RoleList.UCAFDeleteCode, RoleList.CompanyReadCode, RoleList.CompanyUpdateCode]),
+            ("Muhasebeci", false, users[1], [RoleList.UCAFReadCode, RoleList.CompanyReadCode])
         ];
 
-        foreach (var (title, isAdmin, user) in mainRoleSpecs)
+        foreach (var (title, isAdmin, user, permissionCodes) in mainRoleSpecs)
         {
             MainRole mainRole = await GetOrCreateMainRoleAsync(company, title, isAdmin, result, cancellationToken);
 
-            foreach (AppRole permissionRole in permissionRoles.Values)
+            HashSet<string> allowedRoleIds = permissionCodes
+                .Where(permissionRoles.ContainsKey)
+                .Select(code => permissionRoles[code].Id)
+                .ToHashSet();
+            HashSet<string> allKnownPermissionRoleIds = permissionRoles.Values.Select(r => r.Id).ToHashSet();
+
+            // Self-healing: an earlier seed run (before roles were differentiated per MainRole)
+            // may have linked permissions this MainRole shouldn't have. Prune those, but only
+            // among the known static permission roles - never touch other, unrelated links.
+            List<MainRoleAndRoleRelationship> staleLinks = await context.MainRoleAndRoleRelationships
+                .Where(x => x.MainRoleId == mainRole.Id && allKnownPermissionRoleIds.Contains(x.RoleId) && !allowedRoleIds.Contains(x.RoleId))
+                .ToListAsync(cancellationToken);
+            if (staleLinks.Count > 0)
             {
+                context.MainRoleAndRoleRelationships.RemoveRange(staleLinks);
+                result.MainRoleRoleLinksRemoved += staleLinks.Count;
+            }
+
+            foreach (string permissionCode in permissionCodes)
+            {
+                if (!permissionRoles.TryGetValue(permissionCode, out AppRole? permissionRole))
+                {
+                    continue;
+                }
+
                 bool linked = await context.MainRoleAndRoleRelationships.AnyAsync(
                     x => x.MainRoleId == mainRole.Id && x.RoleId == permissionRole.Id, cancellationToken);
                 if (!linked)

@@ -1,22 +1,15 @@
 {
   "pageHeading": "Profil",
-  "pageDescription": "Bu, Profil sayfasıdır",
+  "pageDescription": "Profil bilgilerinizi görüntüleyin ve düzenleyin",
   "personalInfo": "Kişisel Bilgiler",
-  "address": "Adres",
   "edit": "Düzenle",
-  "close": "Kapat",
-  "saveChanges": "Değişiklikleri Kaydet",
   "editPersonalInfo": "Kişisel Bilgileri Düzenle",
-  "editAddress": "Adresi Düzenle",
   "updateDetails": "Güncel kalması için bilgilerinizi güncelleyin.",
-  "socialLinks": "Sosyal Bağlantılar",
   "firstName": "Ad",
   "lastName": "Soyad",
+  "userName": "Kullanıcı Adı",
   "emailAddress": "E-posta Adresi",
   "phone": "Telefon",
-  "bio": "Biyografi",
-  "country": "Ülke",
-  "cityState": "Şehir/Eyalet",
-  "postalCode": "Posta Kodu",
-  "taxId": "Vergi No"
+  "updateSuccess": "Profiliniz güncellendi.",
+  "updateFailed": "Profil güncellenemedi."
 }

@@ -3,6 +3,7 @@ using OnlineAccountingApp.Application.Services.CompanyServices;
 using OnlineAccountingApp.Domain.AppEntities;
 using OnlineAccountingApp.Domain.Entities;
 using OnlineAccountingApp.Domain.Exceptions;
+using OnlineAccountingApp.Domain.Roles;
 using OnlineAccountingApp.Framework.MedatR.Create;
 using OnlineAccountingApp.Framework.Services;
 using System.Linq.Expressions;
@@ -18,6 +19,17 @@ public class CreateCompanyCommandHandler(IUnitOfWork unitOfWork, ICompanyContext
     protected override string GetAlreadyExistsErrorCode() => AppErrorCodes.Company.AlreadyExists;
 
     protected override string GetAlreadyExistsErrorMessage() => "A company with the same name already exists.";
+
+    /// <summary>Only a system admin may create new companies - everyone else is limited to the companies they already belong to.</summary>
+    protected override Task BeforeCreateAsync(Company entity, CreateCompanyCommand request, CancellationToken cancellationToken)
+    {
+        if (!companyContext.IsInRole(RoleList.SystemAdmin))
+        {
+            throw new BusinessException(AppErrorCodes.Company.PermissionDenied, "You do not have permission to create a company.");
+        }
+
+        return Task.CompletedTask;
+    }
 
     protected override async Task AfterCreateAsync(Company entity, CreateCompanyCommand request, CancellationToken cancellationToken)
     {

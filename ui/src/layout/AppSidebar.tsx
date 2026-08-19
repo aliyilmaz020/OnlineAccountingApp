@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
 
@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import {
   ChevronDownIcon,
   GridIcon,
+  GroupIcon,
   HorizontaLDots,
   ListIcon,
   PageIcon,
@@ -14,6 +15,8 @@ import {
   UserCircleIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
+import { usePermission } from "../context/PermissionContext";
+import { UCAF_PERMISSIONS } from "../constants/permissions";
 
 type NavItem = {
   name: string;
@@ -44,6 +47,11 @@ const accountingItems: NavItem[] = [
     path: "/companies",
   },
   {
+    icon: <UserCircleIcon />,
+    name: "sidebar:users",
+    path: "/users",
+  },
+  {
     icon: <ListIcon />,
     name: "sidebar:roles",
     subItems: [
@@ -57,6 +65,11 @@ const accountingItems: NavItem[] = [
     icon: <TableIcon />,
     name: "sidebar:uniformChartOfAccounts",
     path: "/uniform-chart-of-accounts",
+  },
+  {
+    icon: <GroupIcon />,
+    name: "sidebar:systemTools",
+    path: "/system-tools",
   },
 ];
 
@@ -74,7 +87,16 @@ const othersItems: NavItem[] = [
 const AppSidebar: React.FC = () => {
   const { t } = useTranslation();
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
+  const { hasPermission } = usePermission();
   const location = useLocation();
+
+  const visibleAccountingItems = useMemo(
+    () =>
+      accountingItems.filter(
+        (item) => item.name !== "sidebar:uniformChartOfAccounts" || hasPermission(UCAF_PERMISSIONS.Read)
+      ),
+    [hasPermission]
+  );
 
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: MenuType;
@@ -344,7 +366,7 @@ const AppSidebar: React.FC = () => {
                   <HorizontaLDots />
                 )}
               </h2>
-              {renderMenuItems(accountingItems, "accounting")}
+              {renderMenuItems(visibleAccountingItems, "accounting")}
             </div>
             <div className="">
               <h2

@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
+using OnlineAccountingApp.Domain.Roles;
+using OnlineAccountingApp.Grpc.Authorization;
 using OnlineAccountingApp.Grpc.DependencyInjections;
 using OnlineAccountingApp.Grpc.Interceptors;
 using OnlineAccountingApp.Grpc.Services;
@@ -15,7 +18,14 @@ builder.Services.AddGrpcPersistence(builder.Configuration);
 builder.Services.AddGrpcAuthentication(builder.Configuration);
 builder.Services.AddGrpcInfrastructure(builder.Configuration);
 builder.Services.AddGrpcApplication();
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(RoleList.UCAFCreateCode, policy => policy.Requirements.Add(new PermissionRequirement(RoleList.UCAFCreateCode)));
+    options.AddPolicy(RoleList.UCAFReadCode, policy => policy.Requirements.Add(new PermissionRequirement(RoleList.UCAFReadCode)));
+    options.AddPolicy(RoleList.UCAFUpdateCode, policy => policy.Requirements.Add(new PermissionRequirement(RoleList.UCAFUpdateCode)));
+    options.AddPolicy(RoleList.UCAFDeleteCode, policy => policy.Requirements.Add(new PermissionRequirement(RoleList.UCAFDeleteCode)));
+});
+builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
 var app = builder.Build();
 

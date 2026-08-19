@@ -6,6 +6,7 @@ using OnlineAccountingApp.Application.Tests.TestHelpers;
 using OnlineAccountingApp.Domain.AppEntities;
 using OnlineAccountingApp.Domain.Entities;
 using OnlineAccountingApp.Domain.Exceptions;
+using OnlineAccountingApp.Domain.Roles;
 using OnlineAccountingApp.Framework.Services;
 using System.Linq.Expressions;
 
@@ -27,10 +28,11 @@ public class CreateCompanyCommandHandlerTests
         ServerPassword = "password"
     };
 
-    private static Mock<ICompanyContext> BuildCompanyContext(string? userId = "user-1")
+    private static Mock<ICompanyContext> BuildCompanyContext(string? userId = "user-1", bool isAdmin = true)
     {
         Mock<ICompanyContext> companyContext = new();
         companyContext.Setup(c => c.UserId).Returns(userId);
+        companyContext.Setup(c => c.IsInRole(RoleList.SystemAdmin)).Returns(isAdmin);
         return companyContext;
     }
 
@@ -94,5 +96,23 @@ public class CreateCompanyCommandHandlerTests
         Func<Company, bool> compiledPredicate = capturedPredicate!.Compile();
         Assert.True(compiledPredicate(new Company { Name = command.Name }));
         Assert.False(compiledPredicate(new Company { Name = "A Completely Different Name" }));
+    }
+
+    [Fact]
+    public async Task Handle_ShouldThrowPermissionDenied_WhenCallerIsNotSystemAdmin()
+    {
+        (Mock<IUnitOfWork> unitOfWork, Mock<IRepository<Company>> repository) = UnitOfWorkMockFactory.Create<Company>();
+        repository.Setup(r => r.ExistsAsync(It.IsAny<Expression<Func<Company, bool>>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+
+        Mock<ICompanyContext> companyContext = BuildCompanyContext(isAdmin: false);
+        CreateCompanyCommandHandler handler = new(unitOfWork.Object, companyContext.Object);
+        CreateCompanyCommand command = BuildCommand();
+
+        BusinessException exception = await Assert.ThrowsAsync<BusinessException>(
+            () => handler.Handle(command, CancellationToken.None));
+
+        Assert.Equal(AppErrorCodes.Company.PermissionDenied, exception.ErrorCode);
+        repository.Verify(r => r.CreateAsync(It.IsAny<Company>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 }

@@ -3,6 +3,8 @@ using OnlineAccountingApp.Application.Features.AppFeatures.CompanyFeature.Create
 using OnlineAccountingApp.Application.Features.AppFeatures.RoleFeature.Create;
 using OnlineAccountingApp.Application.Features.AppFeatures.RoleFeature.GetRoles;
 using OnlineAccountingApp.Application.Features.AppFeatures.RoleFeature.Update;
+using OnlineAccountingApp.Application.Features.AppFeatures.UserFeature.GetMyProfile;
+using OnlineAccountingApp.Application.Features.AppFeatures.UserFeature.GetUsers;
 using OnlineAccountingApp.Application.Features.CompanyFeatures.UniformChartOfAccountFeature.Create;
 using OnlineAccountingApp.Application.Features.CompanyFeatures.UniformChartOfAccountFeature.GetList;
 using OnlineAccountingApp.Application.Features.CompanyFeatures.UniformChartOfAccountFeature.Update;
@@ -34,5 +36,11 @@ public static class MapsterConfig
         TypeAdapterConfig<UpdateRoleCommand, AppRole>.NewConfig()
             .Ignore(role => role.Id);
         TypeAdapterConfig<AppRole, RoleListItemDto>.NewConfig();
+    }
+
+    public static void RegisterUserMappings()
+    {
+        TypeAdapterConfig<AppUser, UserListItemDto>.NewConfig();
+        TypeAdapterConfig<AppUser, MyProfileDto>.NewConfig();
     }
 }

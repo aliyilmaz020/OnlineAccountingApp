@@ -13,9 +13,9 @@ public sealed class UpdateCompanyCommandValidator : BaseUpdateCommandValidator<U
         RuleFor(command => command.TaxDepartment).NotEmpty();
         RuleFor(command => command.PhoneNumber).NotEmpty();
         RuleFor(command => command.Email).NotEmpty().EmailAddress();
-        RuleFor(command => command.ServerName).NotEmpty();
-        RuleFor(command => command.DatabaseName).NotEmpty();
-        RuleFor(command => command.ServerUserId).NotEmpty();
-        RuleFor(command => command.ServerPassword).NotEmpty();
+        // RuleFor(command => command.ServerName).NotEmpty();
+        // RuleFor(command => command.DatabaseName).NotEmpty();
+        // RuleFor(command => command.ServerUserId).NotEmpty();
+        // RuleFor(command => command.ServerPassword).NotEmpty();
     }
 }

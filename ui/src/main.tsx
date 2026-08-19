@@ -9,6 +9,7 @@ import { AppWrapper } from "./components/common/PageMeta.tsx";
 import { ThemeProvider } from "./context/ThemeContext.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx";
 import { CompanyProvider } from "./context/CompanyContext.tsx";
+import { PermissionProvider } from "./context/PermissionContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -16,9 +17,11 @@ createRoot(document.getElementById("root")!).render(
       <ThemeProvider>
         <AuthProvider>
           <CompanyProvider>
-            <AppWrapper>
-              <App />
-            </AppWrapper>
+            <PermissionProvider>
+              <AppWrapper>
+                <App />
+              </AppWrapper>
+            </PermissionProvider>
           </CompanyProvider>
         </AuthProvider>
       </ThemeProvider>

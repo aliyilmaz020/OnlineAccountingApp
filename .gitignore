@@ -365,3 +365,5 @@ graphify-out/
 
 # Claude Code local runtime state
 .claude/
+**/.env
+**/.env.example

@@ -1,6 +1,6 @@
 {
   "title": "Ana Rol - Rol İlişkileri",
   "description": "Ana rol ve rol ilişki yönetimi",
-  "columns": { "roleId": "Rol Id", "mainRoleId": "Ana Rol Id" },
+  "columns": { "roleId": "Rol", "mainRoleId": "Ana Rol" },
   "form": { "role": "Rol", "rolePlaceholder": "Rol seçin", "mainRole": "Ana Rol", "mainRolePlaceholder": "Ana rol seçin" }
 }

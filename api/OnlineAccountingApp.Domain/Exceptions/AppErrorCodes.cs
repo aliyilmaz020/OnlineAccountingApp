@@ -19,6 +19,7 @@ public static class AppErrorCodes
         public const string NotFound = ServiceCode + "404";
         public const string AlreadyExists = ServiceCode + "409";
         public const string ValidationFailed = ServiceCode + "400";
+        public const string PermissionDenied = ServiceCode + "403";
     }
 
     public static class UniformChartOfAccount

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { apiDelete, apiGet, apiPost, apiPut } from "../lib/apiClient";
 import { ApiError } from "../lib/apiError";
 import type { PagedResult } from "../types/api";
-import i18next from "../i18n/config";
 
 export interface CrudConfig {
   basePath: string;
@@ -18,6 +18,7 @@ export function useCrud<
   TUpdateReq,
 >(config: CrudConfig) {
   const { basePath, getListAction, createAction, updateAction, deleteAction } = config;
+  const { t } = useTranslation("common");
 
   const [items, setItems] = useState<TListItem[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -26,11 +27,16 @@ export function useCrud<
   const [pageSize] = useState(20);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // apiErrorMessage holds server-provided text as-is; hasGenericError means the client-side
+  // fallback should be shown - resolved via t() at render time so it updates instantly on
+  // language switch, instead of freezing whatever language was active when the error occurred.
+  const [apiErrorMessage, setApiErrorMessage] = useState<string | null>(null);
+  const [hasGenericError, setHasGenericError] = useState(false);
 
   const fetchList = useCallback(async () => {
     setIsLoading(true);
-    setError(null);
+    setApiErrorMessage(null);
+    setHasGenericError(false);
     try {
       const result = await apiGet<PagedResult<TListItem>>(`${basePath}/${getListAction}`, {
         pageNumber,
@@ -41,12 +47,18 @@ export function useCrud<
       setTotalCount(result.totalCount);
       setTotalPages(result.totalPages);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : i18next.t("common:errors.listFetchFailed"));
+      if (err instanceof ApiError) {
+        setApiErrorMessage(err.message);
+      } else {
+        setHasGenericError(true);
+      }
     } finally {
       setIsLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [basePath, getListAction, pageNumber, pageSize, searchTerm]);
+
+  const error = hasGenericError ? t("errors.listFetchFailed") : apiErrorMessage;
 
   useEffect(() => {
     fetchList();

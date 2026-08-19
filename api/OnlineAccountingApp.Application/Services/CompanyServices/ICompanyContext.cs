@@ -17,4 +17,10 @@ public interface ICompanyContext
     /// user actually belongs to the requested company.
     /// </summary>
     string? UserId { get; }
+
+    /// <summary>
+    /// Whether the authenticated user has the given Identity role (e.g. RoleList.SystemAdmin) -
+    /// read straight from the JWT's role claims, independent of company/MainRole scoping.
+    /// </summary>
+    bool IsInRole(string roleName);
 }

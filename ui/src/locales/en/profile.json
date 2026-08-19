@@ -1,22 +1,15 @@
 {
   "pageHeading": "Profile",
-  "pageDescription": "This is the Profile page",
+  "pageDescription": "View and edit your profile information",
   "personalInfo": "Personal Information",
-  "address": "Address",
   "edit": "Edit",
-  "close": "Close",
-  "saveChanges": "Save Changes",
   "editPersonalInfo": "Edit Personal Information",
-  "editAddress": "Edit Address",
   "updateDetails": "Update your details to keep your profile up-to-date.",
-  "socialLinks": "Social Links",
   "firstName": "First Name",
   "lastName": "Last Name",
+  "userName": "Username",
   "emailAddress": "Email Address",
   "phone": "Phone",
-  "bio": "Bio",
-  "country": "Country",
-  "cityState": "City/State",
-  "postalCode": "Postal Code",
-  "taxId": "TAX ID"
+  "updateSuccess": "Your profile has been updated.",
+  "updateFailed": "Could not update the profile."
 }

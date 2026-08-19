@@ -8,5 +8,6 @@ public sealed class SeedSampleDataResultDto
     public int UserCompanyLinksCreated { get; set; }
     public int MainRolesCreated { get; set; }
     public int MainRoleRoleLinksCreated { get; set; }
+    public int MainRoleRoleLinksRemoved { get; set; }
     public int MainRoleUserLinksCreated { get; set; }
 }

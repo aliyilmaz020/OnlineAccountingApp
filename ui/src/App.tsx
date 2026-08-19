@@ -15,6 +15,9 @@ import MainRolesListPage from "./pages/MainRoles/MainRolesListPage";
 import MainRoleAndRoleRelationshipsListPage from "./pages/MainRoleAndRoleRelationships/MainRoleAndRoleRelationshipsListPage";
 import MainRoleAndUserRelationshipsListPage from "./pages/MainRoleAndUserRelationships/MainRoleAndUserRelationshipsListPage";
 import UniformChartOfAccountsListPage from "./pages/UniformChartOfAccounts/UniformChartOfAccountsListPage";
+import UsersListPage from "./pages/Users/UsersListPage";
+import SystemToolsPage from "./pages/SystemTools/SystemToolsPage";
+import AccountSettingsPage from "./pages/AccountSettings/AccountSettingsPage";
 
 export default function App() {
   return (
@@ -34,9 +37,11 @@ export default function App() {
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
+            <Route path="/account-settings" element={<AccountSettingsPage />} />
 
             {/* Accounting */}
             <Route path="/companies" element={<CompaniesListPage />} />
+            <Route path="/users" element={<UsersListPage />} />
             <Route path="/roles" element={<RolesListPage />} />
             <Route path="/main-roles" element={<MainRolesListPage />} />
             <Route
@@ -55,6 +60,7 @@ export default function App() {
                 </RequireCompany>
               }
             />
+            <Route path="/system-tools" element={<SystemToolsPage />} />
           </Route>
 
           {/* Company selection (authenticated, outside AppLayout) */}

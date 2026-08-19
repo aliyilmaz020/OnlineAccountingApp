@@ -29,6 +29,7 @@ public static class GrpcApplicationDependencyInjection
             services.AddScoped<IRefreshTokenService, RefreshTokenService>();
             services.AddScoped<IUniformChartOfAccountService, UniformChartOfAccountService>();
             services.AddScoped<IRoleService, RoleService>();
+            services.AddScoped<IPermissionService, PermissionService>();
         }
     }
 }

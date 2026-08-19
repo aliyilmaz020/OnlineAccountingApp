@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 Monorepo: the .NET backend lives in `api/` (contains `OnlineAccountingApp.slnx`); the React/Vite frontend lives in `ui/`. Run `dotnet` commands from `api/`; run `npm` commands from `ui/`.
-Bu projede ayrı branch açılmayacak. master branchinden devam edilecek. Localde değişiklikler görülecek.
+Bu projede ayrı branch açılmayacak. master branchinden devam edilecek. Localde değişiklikler görülecek. GitHub'da da ayrı bir feature/worktree branch'i veya pull request akışı açılmayacak — değişiklikler doğrudan master'a gider. Arka plan (background) ajan oturumları için worktree izolasyonu bu repoda kapalı tutulur (`.claude/settings.json` → `"worktree": {"bgIsolation": "none"}`); yani `EnterWorktree` bu projede kullanılmamalı, düzenlemeler doğrudan paylaşılan checkout'ta (master) yapılmalı. Commit yalnızca kullanıcı açıkça istediğinde atılır. Claude bu projede `dotnet build`, `dotnet run`, `dotnet test`, `npm run build`, `npm run dev` gibi hiçbir derleme/çalıştırma komutunu kendiliğinden (ör. değişiklik sonrası doğrulama amacıyla) çalıştırmaz — build/test doğrulaması kullanıcı tarafından manuel yapılır.
 **Backend**
 
 - Build: `dotnet build OnlineAccountingApp.slnx`
@@ -87,8 +87,4 @@ Frontend is a TailAdmin React template (Vite + React 19 + TypeScript + Tailwind)
 - Feature pages follow `src/pages/<Feature>/<Feature>ListPage.tsx` + `<Feature>Form.tsx`, registered as routes in `App.tsx` (e.g. `Companies`, `Roles`, `MainRoles`, `MainRoleAndRoleRelationships`, `MainRoleAndUserRelationships`, `UniformChartOfAccounts` — the last one wrapped in `RequireCompany` since it hits a tenant DB).
 - i18n via `react-i18next`: `src/i18n/config.ts` initializes it with `tr`/`en` resources assembled from `src/locales/{tr,en}/<namespace>.json` (one JSON pair per feature/page, e.g. `companies.json`, `roles.json`, `crud.json`, `common.json`). Components pull their namespace with `useTranslation("<namespace>")` (or an array of namespaces) and call `t("key")` — never hardcode UI copy. Add new text to both the `tr` and `en` JSON files under the right namespace (creating a new namespace file pair + registering it in `i18n/config.ts` if none fits) instead of inlining a string.
 
-Rules:
-- Ui katmanındaki gereksiz componentler kaldırılacak.
-- Ui katmanı Api katmanıyla entegre çalışacak.
-- Tema rengi koyu olacak
 
