@@ -7,6 +7,7 @@ import {
   clearSelectedCompanyId,
   setTokens,
   setUnauthorizedHandler,
+  logoutRequest,
 } from "../lib/apiClient";
 import type { AuthResponse, LoginRequest, RegisterRequest } from "../types/auth";
 import type { MyProfile } from "../types/entities";
@@ -29,6 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<MyProfile | null>(null);
 
   const logout = useCallback(() => {
+    void logoutRequest();
     clearTokens();
     clearSelectedCompanyId();
     setIsAuthenticated(false);

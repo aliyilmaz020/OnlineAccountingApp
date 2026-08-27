@@ -158,3 +158,13 @@ export function apiPut<T>(path: string, body?: unknown): Promise<T> {
 export function apiDelete<T>(path: string, body?: unknown): Promise<T> {
   return request<T>(path, { method: "DELETE", body });
 }
+
+export function logoutRequest(): Promise<void> {
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) {
+    return Promise.resolve();
+  }
+  return apiPost<void>("/api/Auth/Logout", { refreshToken }).catch(() => {
+    // Best-effort server-side revoke; client-side cleanup proceeds regardless.
+  });
+}

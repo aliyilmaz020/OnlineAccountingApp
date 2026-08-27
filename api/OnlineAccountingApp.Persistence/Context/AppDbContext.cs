@@ -14,7 +14,6 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : Ident
 {
     public DbSet<Company> Companies { get; set; }
     public DbSet<UserCompany> UserCompanies { get; set; }
-    public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<MainRole> MainRoles { get; set; }
     public DbSet<MainRoleAndRoleRelationship> MainRoleAndRoleRelationships { get; set; }
     public DbSet<MainRoleAndUserRelationship> MainRoleAndUserRelationships { get; set; }

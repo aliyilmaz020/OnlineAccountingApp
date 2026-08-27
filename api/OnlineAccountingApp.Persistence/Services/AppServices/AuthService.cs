@@ -2,17 +2,14 @@ using Microsoft.AspNetCore.Identity;
 using OnlineAccountingApp.Application.Services.AppServices;
 using OnlineAccountingApp.Domain.Entities.Identity;
 using OnlineAccountingApp.Domain.Exceptions;
-using OnlineAccountingApp.Framework.Services;
 using DomainValidationException = OnlineAccountingApp.Domain.Exceptions.ValidationException;
-using RefreshTokenEntity = OnlineAccountingApp.Domain.Entities.RefreshToken;
 
 namespace OnlineAccountingApp.Persistence.Services.AppServices;
 
 public sealed class AuthService(
     UserManager<AppUser> userManager,
     ITokenService tokenService,
-    IRefreshTokenService refreshTokenService,
-    IUnitOfWork unitOfWork) : IAuthService
+    IRefreshTokenService refreshTokenService) : IAuthService
 {
     public async Task<AuthResponseDto> LoginAsync(string email, string password, CancellationToken cancellationToken = default)
     {
@@ -47,51 +44,44 @@ public sealed class AuthService(
 
     public async Task<AuthResponseDto> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
     {
-        RefreshTokenEntity? storedToken = await refreshTokenService.GetByTokenAsync(refreshToken, cancellationToken);
-        if (storedToken is null || !storedToken.IsActive(DateTime.UtcNow))
+        RefreshTokenRecord? record = await refreshTokenService.GetAsync(refreshToken, cancellationToken);
+        if (record is null)
         {
             throw new BusinessException(AppErrorCodes.Auth.InvalidRefreshToken, "Refresh token is invalid, expired or already used.");
         }
 
-        AppUser? user = await userManager.FindByIdAsync(storedToken.AppUserId);
+        AppUser? user = await userManager.FindByIdAsync(record.UserId);
         if (user is null)
         {
+            await refreshTokenService.RevokeAsync(refreshToken, cancellationToken);
             throw new BusinessException(AppErrorCodes.Auth.InvalidRefreshToken, "Refresh token is invalid, expired or already used.");
         }
 
         AccessToken accessToken = await CreateAccessTokenAsync(user);
 
-        // Rotate: the presented token is revoked and replaced, so replaying it fails.
-        storedToken.RevokedAt = DateTime.UtcNow;
-
-        RefreshTokenEntity newRefreshToken = BuildRefreshToken(user.Id);
-
-        await unitOfWork.BeginTransactionAsync(cancellationToken);
-        await refreshTokenService.UpdateAsync(storedToken, cancellationToken);
-        await refreshTokenService.CreateAsync(newRefreshToken, cancellationToken);
-        await unitOfWork.CommitAsync(cancellationToken);
+        // Rotate: IssuedAtUtc is carried over, so the absolute session expiry never gets pushed forward.
+        (string newRefreshToken, _) = await refreshTokenService.RotateAsync(refreshToken, record, cancellationToken);
 
         return new AuthResponseDto
         {
             AccessToken = accessToken.Token,
-            RefreshToken = newRefreshToken.Token,
+            RefreshToken = newRefreshToken,
             AccessTokenExpiresAt = accessToken.ExpiresAt
         };
     }
 
+    public Task LogoutAsync(string refreshToken, CancellationToken cancellationToken = default)
+        => refreshTokenService.RevokeAsync(refreshToken, cancellationToken);
+
     private async Task<AuthResponseDto> IssueTokensAsync(AppUser user, CancellationToken cancellationToken)
     {
         AccessToken accessToken = await CreateAccessTokenAsync(user);
-        RefreshTokenEntity refreshToken = BuildRefreshToken(user.Id);
-
-        await unitOfWork.BeginTransactionAsync(cancellationToken);
-        await refreshTokenService.CreateAsync(refreshToken, cancellationToken);
-        await unitOfWork.CommitAsync(cancellationToken);
+        (string refreshToken, _) = await refreshTokenService.IssueAsync(user.Id, cancellationToken);
 
         return new AuthResponseDto
         {
             AccessToken = accessToken.Token,
-            RefreshToken = refreshToken.Token,
+            RefreshToken = refreshToken,
             AccessTokenExpiresAt = accessToken.ExpiresAt
         };
     }
@@ -100,17 +90,6 @@ public sealed class AuthService(
     {
         IList<string> roles = await userManager.GetRolesAsync(user);
         return tokenService.CreateAccessToken(user, roles);
-    }
-
-    private RefreshTokenEntity BuildRefreshToken(string appUserId)
-    {
-        return new RefreshTokenEntity
-        {
-            Token = tokenService.CreateRefreshToken(),
-            AppUserId = appUserId,
-            ExpiresAt = tokenService.GetRefreshTokenExpiry(),
-            Status = true
-        };
     }
 
     /// <summary>Surfaces Identity's own failures through the app's validation error shape.</summary>

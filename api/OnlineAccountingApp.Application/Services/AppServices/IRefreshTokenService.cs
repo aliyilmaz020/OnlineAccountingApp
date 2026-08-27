@@ -1,9 +1,12 @@
-using OnlineAccountingApp.Domain.Entities;
-using OnlineAccountingApp.Framework.Services;
-
 namespace OnlineAccountingApp.Application.Services.AppServices;
 
-public interface IRefreshTokenService : IRepository<RefreshToken>
+public interface IRefreshTokenService : ICacheService
 {
-    Task<RefreshToken?> GetByTokenAsync(string token, CancellationToken cancellationToken = default);
+    Task<(string Token, RefreshTokenRecord Record)> IssueAsync(string userId, CancellationToken cancellationToken = default);
+
+    Task<RefreshTokenRecord?> GetAsync(string token, CancellationToken cancellationToken = default);
+
+    Task<(string Token, RefreshTokenRecord Record)> RotateAsync(string oldToken, RefreshTokenRecord existingRecord, CancellationToken cancellationToken = default);
+
+    Task RevokeAsync(string token, CancellationToken cancellationToken = default);
 }

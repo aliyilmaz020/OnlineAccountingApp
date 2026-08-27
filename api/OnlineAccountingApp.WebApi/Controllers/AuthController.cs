@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OnlineAccountingApp.Application.Features.AppFeatures.AuthFeature.Login;
+using OnlineAccountingApp.Application.Features.AppFeatures.AuthFeature.Logout;
 using OnlineAccountingApp.Application.Features.AppFeatures.AuthFeature.RefreshToken;
 using OnlineAccountingApp.Application.Features.AppFeatures.AuthFeature.Register;
 
@@ -29,5 +30,12 @@ public class AuthController(IMediator mediator) : BaseApiController(mediator)
     {
         var result = await mediator.Send(command, cancellationToken);
         return Ok(result);
+    }
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> Logout([FromBody] LogoutCommand command, CancellationToken cancellationToken)
+    {
+        await mediator.Send(command, cancellationToken);
+        return Ok();
     }
 }

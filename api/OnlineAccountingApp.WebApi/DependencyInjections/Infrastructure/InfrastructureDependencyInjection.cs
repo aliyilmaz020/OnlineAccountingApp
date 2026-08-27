@@ -26,6 +26,8 @@ public static partial class InfrastructureDependencyInjection
                 var connection = ConnectionMultiplexer.Connect(redisConf!.ConnectionString);
                 return connection;
             });
+
+            services.AddScoped<IRefreshTokenService, RedisRefreshTokenService>();
         }
     }
 }

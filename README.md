@@ -54,6 +54,7 @@ gerçekten erişim hakkı olduğu bir şirket olmak zorundadır.
 | Nesne eşleme | Mapster 10.0.11 |
 | Doğrulama | FluentValidation 12.1.1 |
 | Kimlik doğrulama | ASP.NET Core Identity + JWT Bearer 10.0.10 |
+| Refresh token deposu | Redis (StackExchange.Redis 3.1.13) |
 | API dokümantasyonu | Swashbuckle 10.2.3 / Microsoft.OpenApi 2.9.0 |
 
 ## Gereksinimler ve Kurulum
@@ -62,6 +63,7 @@ gerçekten erişim hakkı olduğu bir şirket olmak zorundadır.
 
 - .NET 10 SDK
 - SQL Server (LocalDB, Express veya Docker)
+- Redis (refresh token deposu için gerekli — Docker önerilir, bkz. [Auth](#api-referansı))
 - EF Core CLI: `dotnet tool install --global dotnet-ef`
 
 **Adımlar**
@@ -119,6 +121,22 @@ master veritabanını gösterir:
 > `dotnet user-secrets set "Jwt:SecretKey" "..."`. HMAC-SHA256 için en az 32 baytlık bir anahtar
 > kullanın.
 
+**Redis ayarları.** Refresh token'lar Redis'te tutulur; bağlantı bilgisi `Redis:ConnectionString`
+alanından okunur:
+
+```json
+"Redis": {
+  "ConnectionString": "localhost:6379,password=secret,abortConnect=false"
+}
+```
+
+Yerelde Docker ile hızlıca ayağa kaldırmak için (yukarıdaki varsayılan bağlantı dizesiyle birebir
+uyumludur):
+
+```bash
+docker run -d --name c_redis -p 6379:6379 redis:7 redis-server --requirepass secret
+```
+
 ## Veritabanı ve Migration'lar
 
 Projede iki ayrı `DbContext` ve iki ayrı migration klasörü vardır.
@@ -164,6 +182,23 @@ da, şema değişikliğini tüm kiracılara yaydıktan sonra da bu uç nokta ça
 > master veritabanına ait bağlantı dizesini kod içinde sabit tutar ve ilk şirket kaydını şablon
 > olarak kullanır. Farklı bir yerel kurulumunuz varsa bu dizeyi güncellemeniz gerekir.
 
+> **Refresh token'lar artık master veritabanında değil.** `RefreshTokens` tablosu kaldırıldı (bkz.
+> [Auth](#api-referansı)); mevcut bir kurulumdan güncelleme yapıyorsanız tabloyu düşürecek bir
+> migration eklemeniz gerekir:
+>
+> ```bash
+> dotnet ef migrations add RemoveRefreshTokens \
+>   --project OnlineAccountingApp.Persistence \
+>   --startup-project OnlineAccountingApp.WebApi \
+>   --context AppDbContext
+> dotnet ef database update \
+>   --project OnlineAccountingApp.Persistence \
+>   --startup-project OnlineAccountingApp.WebApi \
+>   --context AppDbContext
+> ```
+>
+> Bu migration'la birlikte tablodaki mevcut kayıtlar (ve dolayısıyla aktif oturumlar) kaybolur.
+
 ## Mimari
 
 Clean Architecture; bağımlılıklar daima içe doğru akar.
@@ -200,8 +235,9 @@ api/
 │   └── Migrations/AppDb + Migrations/CompanyDb
 │
 ├── OnlineAccountingApp.Infrastructure/  # Dış dünya gerçeklemeleri
-│   ├── Options/JwtOptions.cs            # "Jwt" yapılandırma bölümü
-│   └── Services/JwtTokenService.cs      # ITokenService — token üretimi
+│   ├── Options/JwtOptions.cs, RedisOptions.cs   # "Jwt" ve "Redis" yapılandırma bölümleri
+│   └── Services/JwtTokenService.cs, RedisCacheService.cs, RedisRefreshTokenService.cs
+│                                         # ITokenService, ICacheService, IRefreshTokenService (Redis tabanlı)
 │
 ├── OnlineAccountingApp.Grpc/            # İkinci sunum katmanı: gRPC host'u
 │   ├── Protos/                          # auth, companies, roles, uniform_chart_of_accounts
@@ -329,6 +365,7 @@ Tek anonim grup; token gerekmez.
 | `POST` | `/api/Auth/Register` | Kullanıcı oluşturur ve token çifti döner |
 | `POST` | `/api/Auth/Login` | E-posta/parola ile giriş, token çifti döner |
 | `POST` | `/api/Auth/RefreshToken` | Refresh token'ı yenisiyle değiştirir (rotasyon) |
+| `POST` | `/api/Auth/Logout` | Refresh token'ı Redis'ten siler (sunucu tarafında oturumu kapatır) |
 
 ```bash
 curl -X POST http://localhost:5251/api/Auth/Login \
@@ -337,8 +374,14 @@ curl -X POST http://localhost:5251/api/Auth/Login \
 # -> { accessToken, refreshToken, accessTokenExpiresAt }
 ```
 
-Access token varsayılan olarak 15 dakika, refresh token 7 gün geçerlidir. Refresh işleminde eski
-token iptal edilir; aynı refresh token'ı ikinci kez kullanmak `04401` döner.
+Access token varsayılan olarak 15 dakika geçerlidir. Refresh token ise **DB'de değil Redis'te**
+tutulur (`refresh-token:{token}` anahtarı) ve süresi **ilk giriş anından itibaren** `RefreshTokenDays`
+(varsayılan 7) gün olarak hesaplanır: `RefreshToken` uç noktası her çağrıldığında token rotate
+edilir (eski değer Redis'ten silinir, yenisi yazılır) ama ilk giriş zamanı (`IssuedAtUtc`) korunur —
+yani aktif kullanım süresi her seferinde "şimdi + 7 gün"e ötelenmez, oturum tam olarak ilk
+girişten `RefreshTokenDays` gün sonra Redis'in kendi TTL mekanizmasıyla kendiliğinden düşer. Süresi
+dolmuş veya zaten tüketilmiş (ikinci kez kullanılan) bir refresh token `04401` döner. `POST
+/api/Auth/Logout` çağrısı aynı token'ı sunucu tarafında da anında geçersiz kılar.
 
 ### Companies — master veritabanı
 
@@ -483,6 +526,9 @@ senkronize edilen birebir kopyalarıdır; WebApi projesine referans vermez.
 | `https://localhost:7293` | HTTPS/2 (gRPC) |
 
 Development ortamında gRPC reflection açıktır (`grpcurl`, Postman gibi istemcilerle keşif için).
+
+> gRPC host'u da `Login`/`RefreshToken` için REST ile aynı `IRefreshTokenService` (Redis tabanlı)
+> gerçeklemesini kullanır; Redis erişilemezse gRPC'nin `Auth` servisi de çalışmaz.
 
 ### Servisler
 
@@ -647,10 +693,14 @@ adımlar:
       ilişki, UniformChartOfAccount feature'larının handler testleri
 - [x] `POST /api/Seed/SeedSampleData` — master veritabanı için idempotent örnek veri doldurma
       uç noktası (bkz. [Örnek Veri Doldurma (Seed)](#örnek-veri-doldurma-seed))
+- [x] Refresh token'lar Redis'e taşındı (`IRefreshTokenService` → `RedisRefreshTokenService`),
+      rotasyonlarda ilk giriş anından itibaren mutlak süre sınırı korunuyor ve `POST
+      /api/Auth/Logout` ile sunucu tarafında anında iptal ekleniyor
 - [ ] **Kullanıcıyı şirkete atama uç noktaları** — şu an `UserCompany` kayıtları elle
       ekleniyor (yukarıdaki nota bakın)
 - [ ] `Me` ucu — kullanıcının erişebildiği şirketleri listeler
 - [ ] `MainRole` feature'larının gRPC'ye taşınması — şu an yalnızca REST üzerinden erişilebiliyor
+- [ ] `Logout` uç noktasının gRPC'ye eklenmesi — şu an yalnızca REST üzerinden erişilebiliyor
 - [ ] `Infrastructure` katmanının kalanının doldurulması (e-posta, dosya, dış servisler)
 - [ ] Şirket bağlantı parolalarının şifrelenmesi
 
@@ -712,6 +762,7 @@ actually has access to, via `UserCompany`.
 | Object mapping | Mapster 10.0.11 |
 | Validation | FluentValidation 12.1.1 |
 | Authentication | ASP.NET Core Identity + JWT Bearer 10.0.10 |
+| Refresh token store | Redis (StackExchange.Redis 3.1.13) |
 | API documentation | Swashbuckle 10.2.3 / Microsoft.OpenApi 2.9.0 |
 
 ## Requirements and Setup
@@ -720,6 +771,7 @@ actually has access to, via `UserCompany`.
 
 - .NET 10 SDK
 - SQL Server (LocalDB, Express, or Docker)
+- Redis (required for the refresh token store — Docker recommended, see [Auth](#api-reference))
 - EF Core CLI: `dotnet tool install --global dotnet-ef`
 
 **Steps**
@@ -776,6 +828,21 @@ dotnet run --project OnlineAccountingApp.WebApi
 > `SecretKey` does not belong in the repository either:
 > `dotnet user-secrets set "Jwt:SecretKey" "..."`. Use a key of at least 32 bytes for HMAC-SHA256.
 
+**Redis settings.** Refresh tokens live in Redis; the connection info comes from
+`Redis:ConnectionString`:
+
+```json
+"Redis": {
+  "ConnectionString": "localhost:6379,password=secret,abortConnect=false"
+}
+```
+
+To spin one up quickly with Docker locally (matches the default connection string above exactly):
+
+```bash
+docker run -d --name c_redis -p 6379:6379 redis:7 redis-server --requirepass secret
+```
+
 ## Database and Migrations
 
 The project has two separate `DbContext` types and two separate migration folders.
@@ -821,6 +888,22 @@ after adding a schema change that must reach all existing tenants.
 > design time (when generating migrations) and uses the first company record as a template. Adjust
 > that string if your local setup differs.
 
+> **Refresh tokens no longer live in the master database.** The `RefreshTokens` table was removed
+> (see [Auth](#api-reference)); if you're updating an existing setup, add a migration to drop it:
+>
+> ```bash
+> dotnet ef migrations add RemoveRefreshTokens \
+>   --project OnlineAccountingApp.Persistence \
+>   --startup-project OnlineAccountingApp.WebApi \
+>   --context AppDbContext
+> dotnet ef database update \
+>   --project OnlineAccountingApp.Persistence \
+>   --startup-project OnlineAccountingApp.WebApi \
+>   --context AppDbContext
+> ```
+>
+> This migration drops any existing rows (and therefore any active sessions) along with the table.
+
 ## Architecture
 
 Clean Architecture; dependencies always point inward.
@@ -857,8 +940,9 @@ api/
 │   └── Migrations/AppDb + Migrations/CompanyDb
 │
 ├── OnlineAccountingApp.Infrastructure/  # Outside-world implementations
-│   ├── Options/JwtOptions.cs            # the "Jwt" configuration section
-│   └── Services/JwtTokenService.cs      # ITokenService — token issuing
+│   ├── Options/JwtOptions.cs, RedisOptions.cs   # the "Jwt" and "Redis" configuration sections
+│   └── Services/JwtTokenService.cs, RedisCacheService.cs, RedisRefreshTokenService.cs
+│                                         # ITokenService, ICacheService, IRefreshTokenService (Redis-backed)
 │
 ├── OnlineAccountingApp.Grpc/            # Second presentation layer: the gRPC host
 │   ├── Protos/                          # auth, companies, roles, uniform_chart_of_accounts
@@ -984,6 +1068,7 @@ The only anonymous group; no token required.
 | `POST` | `/api/Auth/Register` | Creates a user and returns a token pair |
 | `POST` | `/api/Auth/Login` | Signs in with email/password, returns a token pair |
 | `POST` | `/api/Auth/RefreshToken` | Exchanges a refresh token for a new pair (rotation) |
+| `POST` | `/api/Auth/Logout` | Deletes the refresh token from Redis (server-side sign-out) |
 
 ```bash
 curl -X POST http://localhost:5251/api/Auth/Login \
@@ -992,8 +1077,14 @@ curl -X POST http://localhost:5251/api/Auth/Login \
 # -> { accessToken, refreshToken, accessTokenExpiresAt }
 ```
 
-The access token is valid for 15 minutes by default, the refresh token for 7 days. Refreshing
-revokes the presented token; replaying the same refresh token returns `04401`.
+The access token is valid for 15 minutes by default. The refresh token lives **in Redis, not the
+database** (key `refresh-token:{token}`), and its lifetime is computed as `RefreshTokenDays`
+(7 by default) from the **moment of the original login** — every call to `RefreshToken` rotates the
+token (the old Redis key is deleted, a new one written) but the original issue time (`IssuedAtUtc`)
+is carried over unchanged, so active use never pushes the expiry forward. The session drops on its
+own, via Redis's own TTL, exactly `RefreshTokenDays` days after the first login. An expired or
+already-used refresh token returns `04401`. Calling `POST /api/Auth/Logout` revokes the same token
+on the server immediately.
 
 ### Companies — master database
 
@@ -1138,6 +1229,9 @@ not reference the WebApi project.
 | `https://localhost:7293` | HTTPS/2 (gRPC) |
 
 gRPC reflection is enabled in Development (for discovery with tools like `grpcurl` or Postman).
+
+> The gRPC host uses the same Redis-backed `IRefreshTokenService` as REST for `Login`/
+> `RefreshToken`; if Redis is unreachable, gRPC's `Auth` service won't work either.
 
 ### Services
 
@@ -1302,9 +1396,13 @@ steps:
       Role, MainRole and relationship, and UniformChartOfAccount features
 - [x] `POST /api/Seed/SeedSampleData` — idempotent sample-data seeding endpoint for the master
       database (see [Sample Data Seeding](#sample-data-seeding))
+- [x] Refresh tokens moved to Redis (`IRefreshTokenService` → `RedisRefreshTokenService`); rotation
+      preserves the absolute expiry from the original login, and `POST /api/Auth/Logout` now
+      revokes a token server-side immediately
 - [ ] **Assign-user-to-company endpoints** — `UserCompany` rows are currently inserted by hand
       (see the note above)
 - [ ] A `Me` endpoint listing the companies a user can access
 - [ ] Move the `MainRole` features to gRPC — currently REST-only
+- [ ] Add a `Logout` RPC to gRPC — currently REST-only
 - [ ] Fill in the rest of the `Infrastructure` layer (email, files, external services)
 - [ ] Encrypt company connection passwords

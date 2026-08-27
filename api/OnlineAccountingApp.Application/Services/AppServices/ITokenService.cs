@@ -9,6 +9,4 @@ public interface ITokenService
     AccessToken CreateAccessToken(AppUser user, IEnumerable<string> roles);
 
     string CreateRefreshToken();
-
-    DateTime GetRefreshTokenExpiry();
 }
